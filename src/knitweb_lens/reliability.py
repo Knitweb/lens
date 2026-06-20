@@ -34,6 +34,7 @@ class ReliabilityReport:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "status": "abstained" if self.abstained else "answered",
             "confidence": self.confidence,
             "abstained": self.abstained,
             "reason": self.reason,

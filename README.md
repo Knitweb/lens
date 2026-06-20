@@ -118,6 +118,7 @@ HTTP replay shape:
 Every `InterpretAnswer` includes deterministic reliability metadata:
 
 - `confidence`: integer milli-unit score from 0 to 1000;
+- `status`: `answered` or `abstained`;
 - `abstained`: true when cited support is too weak;
 - `reason`: short machine-readable explanation;
 - citation/source/support counts used to derive the score.

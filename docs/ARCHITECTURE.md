@@ -88,6 +88,9 @@ The confidence value is a PLN-style evidence axis. It describes how much support
 Lens found for the cited context; it is not a replacement for the answer text or
 the citations themselves.
 
+The serialized reliability report carries `status` as `answered` or
+`abstained`, plus the boolean `abstained` field for simple clients.
+
 ## Lessons From Similar Systems
 
 - Hyperon/MeTTa: represent knowledge as queryable atoms in a graph-like store,

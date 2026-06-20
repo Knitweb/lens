@@ -8,6 +8,7 @@ def test_query_attaches_integer_reliability_report(tmp_path):
     answer = RLMHarness().query("What preserves provenance citations?", adapters=[LocalFilesAdapter([path])])
 
     assert answer.reliability is not None
+    assert answer.reliability["status"] == "answered"
     assert isinstance(answer.reliability["confidence"], int)
     assert answer.reliability["abstained"] is False
     assert answer.reliability["citation_count"] == 1
@@ -20,6 +21,7 @@ def test_unrelated_query_abstains_with_low_confidence(tmp_path):
     answer = RLMHarness().query("quantum weather banana", adapters=[LocalFilesAdapter([path])])
 
     assert answer.reliability["abstained"] is True
+    assert answer.reliability["status"] == "abstained"
     assert answer.reliability["confidence"] < 250
     assert "Insufficient grounded support" in answer.text
 
