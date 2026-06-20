@@ -26,6 +26,7 @@ from .context import (
 )
 from .eval import EvalCase, load_eval_cases, run_eval
 from .pulse import inspect_pulse_export, pulse_export_issues, validate_pulse_export_shape
+from .prompts import render_model_prompt
 from .retriever import Retriever
 from .reliability import ReliabilityReport, abstention_text, evaluate_session
 from .rlm import LLMAdapter, OfflineLLMAdapter, RLMHarness
@@ -67,6 +68,7 @@ __all__ = [
     "load_eval_cases",
     "pulse_export_issues",
     "run_eval",
+    "render_model_prompt",
     "session_from_context",
     "session_markdown",
     "validate_pulse_export_shape",

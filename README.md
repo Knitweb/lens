@@ -146,6 +146,8 @@ Implemented in v1:
 
 Optional live integrations should wrap these adapters instead of making Lens
 depend on a service SDK.
+For the model side, use `render_model_prompt` and the `LLMAdapter` protocol
+described in [Optional live model adapters](docs/LIVE_ADAPTERS.md).
 
 ## Project Docs
 
@@ -155,6 +157,7 @@ depend on a service SDK.
 - [Project 2 sync instructions](docs/PROJECT2_SYNC.md)
 - [Evals](docs/EVALS.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Optional live model adapters](docs/LIVE_ADAPTERS.md)
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Research references](docs/REFERENCES.md)
 - [Developer outreach](docs/OUTREACH.md)

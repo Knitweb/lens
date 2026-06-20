@@ -21,6 +21,9 @@ Lens v1 is an ephemeral interpret layer over content-addressed fabric data.
 4. An `LLMAdapter` turns selected chunks into an answer.
 5. `InterpretAnswer` returns text plus citations back to each `ChunkRef`.
 
+`render_model_prompt` provides a deterministic prompt surface for optional live
+model adapters. The base package still ships no mandatory live model client.
+
 ## Pulse Export Inspection
 
 Lens includes a small Pulse JSON-LD export shape inspector. It checks whether an

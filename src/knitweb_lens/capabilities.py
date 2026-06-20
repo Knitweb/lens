@@ -25,6 +25,7 @@ OWNED_CAPABILITIES = (
     "ephemeral-interpret-session",
     "portable-context-bundle",
     "citation-rendering",
+    "citation-preserving-prompt-rendering",
     "offline-deterministic-answer-synthesis",
     "integer-confidence-and-abstention",
     "offline-reliability-eval",
