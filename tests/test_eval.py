@@ -35,6 +35,8 @@ def test_run_eval_reports_abstention_and_citation_results(tmp_path):
     assert result["passed"] == 2
     assert result["true_abstentions"] == 1
     assert result["faithfulness_failures"] == 0
+    assert result["confidence_bands"]
+    assert all(isinstance(row["support_rate_milli"], int) for row in result["confidence_bands"].values())
     assert isinstance(result["average_confidence"], int)
 
 
@@ -111,4 +113,5 @@ def test_run_eval_fails_unfaithful_cited_answer(tmp_path):
 
     assert result["failed"] == 1
     assert result["faithfulness_failures"] == 1
+    assert result["confidence_bands"]["250-499"]["support_rate_milli"] == 0
     assert result["cases"][0]["citation_faithful"] is False

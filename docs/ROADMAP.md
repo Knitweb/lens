@@ -58,6 +58,7 @@ Implemented baseline:
 - context replay preserves the same reliability behavior.
 - offline JSON eval harness via `lens eval`.
 - citation-faithfulness failures in eval reports.
+- confidence-band calibration table with integer support rates.
 
 Related issues:
 

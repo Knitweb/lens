@@ -44,6 +44,7 @@ def run_eval(
     harness: RLMHarness | None = None,
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
+    confidence_bands: dict[str, dict[str, int]] = {}
     totals = {
         "total": 0,
         "passed": 0,
@@ -73,6 +74,7 @@ def run_eval(
         missing_citations = tuple(fragment for fragment in case.must_cite if fragment not in cited_text)
         citation_faithful = _citation_faithful(answer)
         passed = (abstained == case.should_abstain) and not missing_citations and citation_faithful
+        band = _confidence_band(confidence)
 
         totals["total"] += 1
         totals["confidence_sum"] += confidence
@@ -92,6 +94,24 @@ def run_eval(
             totals["citation_failures"] += 1
         if not citation_faithful:
             totals["faithfulness_failures"] += 1
+        band_row = confidence_bands.setdefault(
+            band,
+            {
+                "total": 0,
+                "passed": 0,
+                "citation_failures": 0,
+                "faithfulness_failures": 0,
+                "support_rate_milli": 0,
+            },
+        )
+        band_row["total"] += 1
+        if passed:
+            band_row["passed"] += 1
+        if missing_citations:
+            band_row["citation_failures"] += 1
+        if not citation_faithful:
+            band_row["faithfulness_failures"] += 1
+        band_row["support_rate_milli"] = band_row["passed"] * 1000 // band_row["total"]
 
         rows.append(
             {
@@ -120,6 +140,7 @@ def run_eval(
         "citation_failures": totals["citation_failures"],
         "faithfulness_failures": totals["faithfulness_failures"],
         "average_confidence": avg_confidence,
+        "confidence_bands": dict(sorted(confidence_bands.items())),
         "cases": rows,
     }
 
@@ -158,3 +179,13 @@ def _citation_faithful(answer: InterpretAnswer) -> bool:
 
 def _normalize(text: str) -> str:
     return " ".join(text.casefold().split())
+
+
+def _confidence_band(confidence: int) -> str:
+    if confidence >= 750:
+        return "750-1000"
+    if confidence >= 500:
+        return "500-749"
+    if confidence >= 250:
+        return "250-499"
+    return "0-249"
