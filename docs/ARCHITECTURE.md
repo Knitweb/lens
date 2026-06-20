@@ -7,6 +7,9 @@ Lens v1 is an ephemeral interpret layer over content-addressed fabric data.
 - Pulse/Knitweb remains the fabric, transport, accounting, and provenance source.
 - Lens reads exported Web data and source rows. It does not persist consensus
   state or mutate Pulse records.
+- OriginTrail remains the DKG publishing, UAL resolution, anchoring, and
+  cross-network discovery layer. Lens may cite resolved DKG data, but does not
+  publish or anchor assets.
 - Live LLMs, graph databases, and vector stores are optional wrappers around the
   adapter protocol, not base dependencies.
 
@@ -64,4 +67,7 @@ evidence.
 - No base graph database.
 - No required LLM API key.
 - No durable writes to Pulse.
+- No Knitweb/Pulse fabric storage, p2p replication, ledger/accounting,
+  canonical CID generation, Web mutation, or signed-record attestation.
+- No OriginTrail DKG publishing, UAL resolution, anchoring, or asset discovery.
 - No ranking floats in returned metadata.

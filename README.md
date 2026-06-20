@@ -29,6 +29,10 @@ p2p/crypto systems without inheriting their heavy runtime dependencies:
 - no background daemon or channel bridge in the core, keeping the ClaudeClaw
   lesson of isolation and explicit boundaries.
 
+Lens is compatible with Knitweb/Pulse and OriginTrail as a read-only interpret
+layer. It does not replace their fabric storage, p2p replication, canonical CID
+generation, attestation, accounting, DKG publishing, or anchoring.
+
 ## Quick Start
 
 ```bash
@@ -38,6 +42,7 @@ python -m pip install -e ".[dev]"
 lens query "What is Lens for?" README.md --json
 lens export-context "What is Lens for?" README.md --out context.json
 lens render-context context.json --answer
+lens capabilities
 python -m pytest
 ```
 
@@ -122,6 +127,7 @@ depend on a service SDK.
 ## Project Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Compatibility boundary](docs/COMPATIBILITY.md)
 - [Pulse backlog extraction](docs/PULSE_BACKLOG.md)
 - [Project 2 sync instructions](docs/PROJECT2_SYNC.md)
 - [Evals](docs/EVALS.md)

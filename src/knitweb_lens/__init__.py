@@ -9,6 +9,7 @@ from .adapters import (
     SourceAdapter,
     VectorResultsAdapter,
 )
+from .capabilities import compatibility_report
 from .context import (
     CONTEXT_FORMAT,
     CONTEXT_VERSION,
@@ -47,6 +48,7 @@ __all__ = [
     "RankedChunk",
     "SourceAdapter",
     "VectorResultsAdapter",
+    "compatibility_report",
     "answer_from_context",
     "answer_markdown",
     "abstention_text",

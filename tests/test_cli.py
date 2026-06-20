@@ -41,3 +41,10 @@ def test_cli_rejects_conflicting_output_flags(tmp_path, capsys):
 
     assert code == 2
     assert "cannot be used together" in capsys.readouterr().err
+
+
+def test_cli_capabilities_command_is_registered(capsys):
+    code = main(["capabilities"])
+
+    assert code == 0
+    assert "read-only-interpret-layer" in capsys.readouterr().out

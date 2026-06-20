@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .adapters import LocalFilesAdapter, SourceAdapter
+from .capabilities import compatibility_report
 from .context import answer_from_context, answer_markdown, session_from_context, session_markdown
 from .eval import load_eval_cases, run_eval
 from .rlm import RLMHarness
@@ -128,6 +129,11 @@ def cmd_eval(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_capabilities(args: argparse.Namespace) -> int:
+    _print_json(compatibility_report())
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="lens", description="Knitweb Lens interpret CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -182,6 +188,9 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("fixture")
     eval_parser.add_argument("--base-dir", default=".")
     eval_parser.set_defaults(func=cmd_eval)
+
+    capabilities = sub.add_parser("capabilities", help="Print the Lens compatibility boundary")
+    capabilities.set_defaults(func=cmd_capabilities)
 
     return parser
 

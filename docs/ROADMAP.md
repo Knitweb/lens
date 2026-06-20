@@ -61,3 +61,11 @@ Related issue: https://github.com/Knitweb/lens/issues/3
 Small trusted merges are allowed under `docs/REVIEW_POLICY.md`, but reliability,
 service boundary, package metadata, CI, and project-sync changes are control
 surfaces and need maintainer review.
+
+## Compatibility Discipline
+
+Lens should keep improving as the best RLM interpretation layer over Knitweb,
+OriginTrail-resolved data, and other online/p2p knowledge graphs. It should not
+offer the same features as those systems. Use `docs/COMPATIBILITY.md` and
+`lens capabilities` before adding features that touch storage, signing,
+anchoring, p2p transport, accounting, or DKG publishing.
