@@ -21,6 +21,15 @@ Lens v1 is an ephemeral interpret layer over content-addressed fabric data.
 4. An `LLMAdapter` turns selected chunks into an answer.
 5. `InterpretAnswer` returns text plus citations back to each `ChunkRef`.
 
+## Pulse Export Inspection
+
+Lens includes a small Pulse JSON-LD export shape inspector. It checks whether an
+export has object nodes, string ids, object records, list edges, string
+relations/destinations, and integer edge weights, then reports deterministic
+node, edge, UAL, and relation counts. This is consumer-side compatibility
+inspection only. Pulse still owns canonical CID recomputation, signed
+attestation, Web import/export round-trips, mutation, transport, and storage.
+
 ## OriginTrail Snapshots
 
 Lens can read already-resolved OriginTrail Knowledge Asset snapshots and carry

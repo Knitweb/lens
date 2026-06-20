@@ -48,3 +48,13 @@ def test_cli_capabilities_command_is_registered(capsys):
 
     assert code == 0
     assert "read-only-interpret-layer" in capsys.readouterr().out
+
+
+def test_cli_inspect_pulse_reports_fixture_shape(capsys):
+    code = main(["inspect-pulse", "tests/fixtures/pulse_web_export.json"])
+
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["node_count"] == 2
+    assert payload["authoritative_verification"] is False

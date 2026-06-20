@@ -12,12 +12,14 @@ duplicate their core features.
 - Rendering cited answers.
 - Offline deterministic answer synthesis for tests.
 - Integer confidence, abstention, source trust, and eval reports.
+- Pulse export shape inspection for consumer-side compatibility checks.
 
 ## Knitweb/Pulse Owns
 
 - Content-addressed fabric storage.
 - Canonical CBOR and authoritative CID generation.
 - Signed record attestation.
+- Authoritative Pulse export verification and Web import/export round-trips.
 - P2P transport and replication.
 - Pulse accounting, ledger, settlement, and useful-work economics.
 - Web weaving, mutation, and authoritative provenance authoring.

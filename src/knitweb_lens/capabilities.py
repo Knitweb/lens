@@ -28,6 +28,7 @@ OWNED_CAPABILITIES = (
     "offline-deterministic-answer-synthesis",
     "integer-confidence-and-abstention",
     "offline-reliability-eval",
+    "pulse-export-shape-inspection",
 )
 
 DELEGATED_TO_KNITWEB = (

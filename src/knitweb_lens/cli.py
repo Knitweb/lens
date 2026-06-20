@@ -12,6 +12,7 @@ from .adapters import LocalFilesAdapter, SourceAdapter
 from .capabilities import compatibility_report
 from .context import answer_from_context, answer_markdown, session_from_context, session_markdown
 from .eval import load_eval_cases, run_eval
+from .pulse import inspect_pulse_export
 from .rlm import RLMHarness
 from .server import serve
 from .util import stable_json
@@ -134,6 +135,12 @@ def cmd_capabilities(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_inspect_pulse(args: argparse.Namespace) -> int:
+    doc = json.loads(Path(args.export_file).read_text(encoding="utf-8"))
+    _print_json(inspect_pulse_export(doc))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="lens", description="Knitweb Lens interpret CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -191,6 +198,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     capabilities = sub.add_parser("capabilities", help="Print the Lens compatibility boundary")
     capabilities.set_defaults(func=cmd_capabilities)
+
+    inspect_pulse = sub.add_parser("inspect-pulse", help="Inspect a Pulse JSON-LD export shape")
+    inspect_pulse.add_argument("export_file")
+    inspect_pulse.set_defaults(func=cmd_inspect_pulse)
 
     return parser
 

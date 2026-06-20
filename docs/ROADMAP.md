@@ -16,6 +16,10 @@ It accepts already-resolved OriginTrail Knowledge Asset snapshots and preserves
 UAL citations. OriginTrail DKG resolution, querying, publishing, and anchoring
 remain out of scope for Lens.
 
+It can inspect Pulse JSON-LD export shape and produce deterministic counts for
+consumer compatibility. Pulse remains responsible for canonical verification,
+round-trips, mutation, transport, and storage.
+
 ## Current Priorities
 
 ### 1. Real Pulse Fixture

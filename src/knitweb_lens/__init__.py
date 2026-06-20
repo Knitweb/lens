@@ -25,6 +25,7 @@ from .context import (
     session_markdown,
 )
 from .eval import EvalCase, load_eval_cases, run_eval
+from .pulse import inspect_pulse_export, pulse_export_issues, validate_pulse_export_shape
 from .retriever import Retriever
 from .reliability import ReliabilityReport, abstention_text, evaluate_session
 from .rlm import LLMAdapter, OfflineLLMAdapter, RLMHarness
@@ -62,10 +63,13 @@ __all__ = [
     "citations_markdown",
     "context_bundle",
     "evaluate_session",
+    "inspect_pulse_export",
     "load_eval_cases",
+    "pulse_export_issues",
     "run_eval",
     "session_from_context",
     "session_markdown",
+    "validate_pulse_export_shape",
 ]
 
 __version__ = "0.1.0"

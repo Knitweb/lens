@@ -47,6 +47,7 @@ lens query "What is Lens for?" README.md --json
 lens export-context "What is Lens for?" README.md --out context.json
 lens render-context context.json --answer
 lens capabilities
+lens inspect-pulse tests/fixtures/pulse_web_export.json
 python -m pytest
 ```
 
@@ -76,6 +77,10 @@ Adapters normalize source systems into `Chunk` objects. `Retriever` ranks chunks
 with integer-only scores and deterministic tie breaks. `RLMHarness` supplies an
 offline deterministic model adapter by default, so all tests run without API
 keys, embeddings, network access, or vector databases.
+
+`lens inspect-pulse` performs a read-only Pulse JSON-LD export shape check. It
+reports node, edge, UAL, and relation counts; it does not recompute canonical
+CIDs, verify signatures, import/export a Web, or mutate source graphs.
 
 ## Context Bundles
 
