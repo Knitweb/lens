@@ -111,6 +111,7 @@ depend on a service SDK.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Pulse backlog extraction](docs/PULSE_BACKLOG.md)
 - [Project 2 sync instructions](docs/PROJECT2_SYNC.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Research references](docs/REFERENCES.md)
 - [Developer outreach](docs/OUTREACH.md)
