@@ -68,3 +68,21 @@ def test_cli_eval_outputs_json(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["passed"] == 1
 
+
+def test_eval_case_source_trust_controls_abstention(tmp_path):
+    source = tmp_path / "source.md"
+    source.write_text("Lens preserves provenance citations.", encoding="utf-8")
+    cases = [
+        EvalCase(
+            name="untrusted",
+            query="What preserves provenance?",
+            paths=("source.md",),
+            should_abstain=True,
+            source_trust={"local-files": 0},
+        )
+    ]
+
+    result = run_eval(cases, base_dir=tmp_path)
+
+    assert result["passed"] == 1
+    assert result["cases"][0]["trust_support"] == 0

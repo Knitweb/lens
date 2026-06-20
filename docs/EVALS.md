@@ -19,6 +19,7 @@ lens eval path/to/eval.json --base-dir .
       "name": "grounded provenance query",
       "query": "What preserves provenance citations?",
       "paths": ["tests/fixtures/example.md"],
+      "source_trust": {"local-files": 80},
       "should_abstain": false,
       "must_cite": ["example.md"]
     },
@@ -44,3 +45,5 @@ CIDs, and node ids. The result report is integer-only and includes:
 Use this before changing confidence thresholds, retriever scoring, or source
 trust weighting.
 
+`source_trust` is optional. Values are integers from 0 to 100 keyed by Lens
+source id, with 50 as the neutral default.

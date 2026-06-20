@@ -17,6 +17,7 @@ class EvalCase:
     paths: tuple[str, ...] = field(default_factory=tuple)
     should_abstain: bool = False
     must_cite: tuple[str, ...] = field(default_factory=tuple)
+    source_trust: dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "EvalCase":
@@ -26,6 +27,7 @@ class EvalCase:
             paths=tuple(value.get("paths") or ()),
             should_abstain=bool(value.get("should_abstain", False)),
             must_cite=tuple(value.get("must_cite") or ()),
+            source_trust={str(k): int(v) for k, v in (value.get("source_trust") or {}).items()},
         )
 
     def adapters(self, *, base_dir: str | Path = ".") -> list[SourceAdapter]:
@@ -40,7 +42,6 @@ def run_eval(
     base_dir: str | Path = ".",
     harness: RLMHarness | None = None,
 ) -> dict[str, Any]:
-    runner = harness or RLMHarness()
     rows: list[dict[str, Any]] = []
     totals = {
         "total": 0,
@@ -54,6 +55,7 @@ def run_eval(
         "confidence_sum": 0,
     }
     for case in cases:
+        runner = harness or RLMHarness(source_trust=case.source_trust or None)
         answer = runner.query(case.query, adapters=case.adapters(base_dir=base_dir))
         reliability = answer.reliability or {}
         abstained = bool(reliability.get("abstained", False))
@@ -96,6 +98,7 @@ def run_eval(
                 "confidence": confidence,
                 "missing_citations": list(missing_citations),
                 "citation_count": len(answer.citations),
+                "trust_support": int(reliability.get("trust_support", 0)),
             }
         )
     total = totals["total"]
@@ -126,4 +129,3 @@ def load_eval_cases(path: str | Path) -> tuple[EvalCase, ...]:
     if not isinstance(values, list):
         raise ValueError("eval fixture must be a list or an object with a cases list")
     return tuple(EvalCase.from_dict(item) for item in values)
-

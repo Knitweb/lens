@@ -30,10 +30,15 @@ def session_from_context(bundle: dict[str, Any]) -> InterpretSession:
     return session_from_dict(bundle["session"])
 
 
-def answer_from_context(bundle: dict[str, Any], *, llm: LLMAdapter | None = None) -> InterpretAnswer:
+def answer_from_context(
+    bundle: dict[str, Any],
+    *,
+    llm: LLMAdapter | None = None,
+    source_trust: dict[str, int] | None = None,
+) -> InterpretAnswer:
     session = session_from_context(bundle)
     model = llm or OfflineLLMAdapter()
-    report = evaluate_session(session)
+    report = evaluate_session(session, source_trust=source_trust)
     if report.abstained:
         text = abstention_text(report)
     else:

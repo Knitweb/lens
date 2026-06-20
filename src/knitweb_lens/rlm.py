@@ -64,10 +64,12 @@ class RLMHarness:
         retriever: Retriever | None = None,
         llm: LLMAdapter | None = None,
         min_confidence: int = 25,
+        source_trust: dict[str, int] | None = None,
     ) -> None:
         self.retriever = retriever or Retriever()
         self.llm = llm or OfflineLLMAdapter()
         self.min_confidence = min_confidence
+        self.source_trust = source_trust
 
     def collect(self, adapters: Iterable[SourceAdapter]) -> tuple[Chunk, ...]:
         chunks: list[Chunk] = []
@@ -134,7 +136,11 @@ class RLMHarness:
             max_chunks=max_chunks,
             budget_chars=budget_chars,
         )
-        report = evaluate_session(session, min_confidence=self.min_confidence)
+        report = evaluate_session(
+            session,
+            min_confidence=self.min_confidence,
+            source_trust=self.source_trust,
+        )
         if report.abstained:
             text = abstention_text(report)
         else:

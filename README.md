@@ -100,6 +100,7 @@ Every `InterpretAnswer` includes deterministic reliability metadata:
 - `abstained`: true when cited support is too weak;
 - `reason`: short machine-readable explanation;
 - citation/source/support counts used to derive the score.
+- `trust_support`: integer source-trust support, defaulting to neutral 50.
 
 The default harness abstains below the confidence threshold rather than forcing
 an answer from weak evidence.

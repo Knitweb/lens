@@ -43,3 +43,36 @@ def test_min_confidence_range_is_validated():
     else:
         raise AssertionError("expected ValueError")
 
+
+def test_low_source_trust_can_force_abstention(tmp_path):
+    path = tmp_path / "note.md"
+    path.write_text("Lens preserves provenance citations.", encoding="utf-8")
+
+    trusted = RLMHarness(source_trust={"local-files": 100}).query(
+        "What preserves provenance?",
+        adapters=[LocalFilesAdapter([path])],
+    )
+    untrusted = RLMHarness(source_trust={"local-files": 0}).query(
+        "What preserves provenance?",
+        adapters=[LocalFilesAdapter([path])],
+    )
+
+    assert trusted.reliability["trust_support"] == 100
+    assert untrusted.reliability["trust_support"] == 0
+    assert trusted.reliability["confidence"] > untrusted.reliability["confidence"]
+    assert untrusted.reliability["abstained"] is True
+
+
+def test_source_trust_range_is_validated(tmp_path):
+    path = tmp_path / "note.md"
+    path.write_text("Lens preserves provenance citations.", encoding="utf-8")
+
+    try:
+        RLMHarness(source_trust={"local-files": 101}).query(
+            "What preserves provenance?",
+            adapters=[LocalFilesAdapter([path])],
+        )
+    except ValueError as exc:
+        assert "between 0 and 100" in str(exc)
+    else:
+        raise AssertionError("expected ValueError")
