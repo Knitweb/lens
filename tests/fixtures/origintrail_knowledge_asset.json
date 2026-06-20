@@ -1,0 +1,17 @@
+{
+  "@context": "https://schema.org",
+  "@id": "did:dkg:otp:2043/0x1234567890123456789012345678901234567890/42",
+  "@graph": [
+    {
+      "@id": "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+      "@type": "Article",
+      "headline": "OriginTrail Resolved Knowledge Asset Example",
+      "author": {
+        "@type": "Organization",
+        "name": "Knitweb/lens Protocol"
+      },
+      "description": "This fixture represents a resolved Knowledge Asset returned from an OriginTrail DKG node.",
+      "keywords": ["Knowledge Graph", "RAG", "OriginTrail", "Lens"]
+    }
+  ]
+}
