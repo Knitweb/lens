@@ -78,11 +78,11 @@ to answer from exactly that selected evidence.
 
 ## Reliability
 
-Every answer carries an integer-only reliability report. Confidence is derived
-from lexical support, citation count, source diversity, provenance support, and
-optional source trust. If confidence falls below the threshold, Lens returns an
-abstention message instead of asking the model to fabricate an answer from weak
-evidence.
+Every answer carries an integer-only reliability report. Confidence is a
+milli-unit score from 0 to 1000 derived from lexical support, citation count,
+source diversity, provenance support, and optional source trust. If confidence
+falls below the threshold, Lens returns an abstention message instead of asking
+the model to fabricate an answer from weak evidence.
 
 ## Lessons From Similar Systems
 

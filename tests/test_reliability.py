@@ -20,7 +20,7 @@ def test_unrelated_query_abstains_with_low_confidence(tmp_path):
     answer = RLMHarness().query("quantum weather banana", adapters=[LocalFilesAdapter([path])])
 
     assert answer.reliability["abstained"] is True
-    assert answer.reliability["confidence"] < 25
+    assert answer.reliability["confidence"] < 250
     assert "Insufficient grounded support" in answer.text
 
 
@@ -37,9 +37,9 @@ def test_min_confidence_range_is_validated():
     session = RLMHarness().session("anything", adapters=[])
 
     try:
-        evaluate_session(session, min_confidence=101)
+        evaluate_session(session, min_confidence=1001)
     except ValueError as exc:
-        assert "between 0 and 100" in str(exc)
+        assert "between 0 and 1000" in str(exc)
     else:
         raise AssertionError("expected ValueError")
 

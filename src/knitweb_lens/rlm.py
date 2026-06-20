@@ -63,7 +63,7 @@ class RLMHarness:
         *,
         retriever: Retriever | None = None,
         llm: LLMAdapter | None = None,
-        min_confidence: int = 25,
+        min_confidence: int = 250,
         source_trust: dict[str, int] | None = None,
     ) -> None:
         self.retriever = retriever or Retriever()

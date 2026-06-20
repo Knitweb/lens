@@ -40,7 +40,7 @@ CIDs, and node ids. The result report is integer-only and includes:
 - true, false, and missed abstentions;
 - citation failure count;
 - citation-faithfulness failure count;
-- integer average confidence;
+- integer average confidence on the 0-1000 milli-unit scale;
 - per-case confidence, missing citation fragments, and `citation_faithful`.
 
 Use this before changing confidence thresholds, retriever scoring, or source

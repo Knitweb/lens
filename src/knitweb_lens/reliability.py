@@ -57,11 +57,11 @@ def _trust_for(source_id: str, source_trust: dict[str, int] | None) -> int:
 def evaluate_session(
     session: InterpretSession,
     *,
-    min_confidence: int = 25,
+    min_confidence: int = 250,
     source_trust: dict[str, int] | None = None,
 ) -> ReliabilityReport:
-    if min_confidence < 0 or min_confidence > 100:
-        raise ValueError("min_confidence must be between 0 and 100")
+    if min_confidence < 0 or min_confidence > 1000:
+        raise ValueError("min_confidence must be between 0 and 1000")
     ranked = session.ranked_chunks
     citation_count = len(ranked)
     if citation_count == 0:
@@ -83,7 +83,7 @@ def evaluate_session(
     citation_bonus = min(30, citation_count * 10)
     source_bonus = min(20, source_count * 5)
 
-    confidence = max(
+    confidence_percent = max(
         0,
         min(
             100,
@@ -97,7 +97,8 @@ def evaluate_session(
         ),
     )
     if lexical_support == 0:
-        confidence = min(confidence, 20)
+        confidence_percent = min(confidence_percent, 20)
+    confidence = confidence_percent * 10
 
     abstained = confidence < min_confidence
     reason = "sufficient grounded support"
