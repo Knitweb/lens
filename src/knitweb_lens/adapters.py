@@ -211,6 +211,9 @@ def _origintrail_ual(asset: dict[str, Any]) -> str:
         value = asset.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()
+    value = asset.get("@id")
+    if isinstance(value, str) and value.strip().casefold().startswith("did:dkg:"):
+        return value.strip()
     return ""
 
 
@@ -476,6 +479,14 @@ def _activitystreams_relation_path(item: dict[str, Any]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(path))
 
 
+def _activitystreams_actor(item: dict[str, Any]) -> str | None:
+    actor = _value_id(item.get("actor")) or _value_id(item.get("attributedTo"))
+    obj = item.get("object")
+    if actor is None and isinstance(obj, dict):
+        actor = _value_id(obj.get("attributedTo"))
+    return actor
+
+
 class ActivityStreamsAdapter:
     """Adapter for read-only ActivityStreams objects and collections.
 
@@ -509,7 +520,7 @@ class ActivityStreamsAdapter:
             activity_type = _type_name(item.get("type") or item.get("@type")) or "Activity"
             object_type = _type_name(obj.get("type") or obj.get("@type")) if isinstance(obj, dict) else ""
             node_id = _value_id(item) or stable_id("activitystreams-item", item)
-            actor = _value_id(item.get("actor"))
+            actor = _activitystreams_actor(item)
             published = item.get("published") or item.get("updated")
             title = item.get("name")
             if not isinstance(title, str) or not title.strip():

@@ -8,6 +8,10 @@ Asset snapshot. The fixture format is plain JSON:
 - `assertionId`: external assertion identifier;
 - `publicAssertion.@graph`: records Lens can normalize into cited chunks.
 
+Lens also accepts a top-level `@id` as the UAL when it starts with `did:dkg:`.
+That keeps simple JSON-LD exports readable, but explicit `ual`, `assetId`, and
+`assertionId` fields are preferred for test fixtures and review.
+
 `examples/origintrail_resolved_asset.json` is a minimal example. It can be
 queried without any DKG node or SDK:
 

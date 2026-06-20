@@ -183,6 +183,22 @@ def test_origintrail_example_fixture_preserves_ual_and_relations():
     assert dict(by_node["urn:ot:attestation:17"].metadata)["assertion_id"] == "assertion:origintrail:17:public"
 
 
+def test_contributed_origintrail_fixture_uses_dkg_id_as_ual():
+    path = Path(__file__).parent / "fixtures" / "origintrail_knowledge_asset.json"
+    ual = "did:dkg:otp:2043/0x1234567890123456789012345678901234567890/42"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 1
+    chunk = chunks[0]
+    assert chunk.ref.source_id == "local-files:origintrail_knowledge_asset.json"
+    assert chunk.ref.source_uri == ual
+    assert chunk.ref.node_id == "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+    assert dict(chunk.metadata)["adapter"] == "origintrail-ual"
+    assert dict(chunk.metadata)["ual"] == ual
+    assert "resolved Knowledge Asset" in chunk.text
+
+
 def test_origintrail_ual_adapter_rejects_non_object_assets():
     with pytest.raises(ValueError, match="OriginTrail assets must be objects"):
         OriginTrailUALAdapter(["bad"])
@@ -471,3 +487,20 @@ def test_activitystreams_collection_fixture_preserves_human_agent_context():
         "tag->https://social.example/users/operator",
     )
     assert all(dict(chunk.metadata)["adapter"] == "activitystreams" for chunk in chunks)
+
+
+def test_contributed_activitystreams_fixture_preserves_attributed_actors():
+    path = Path(__file__).parent / "fixtures" / "activitystreams_export.json"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 2
+    by_node = {chunk.ref.node_id: chunk for chunk in chunks}
+    human = by_node["urn:uuid:b59c258f-2877-448c-8f96-2679c65691c1"]
+    agent = by_node["urn:uuid:e245a449-33b8-430c-ab2f-9dfc1c91c712"]
+    assert human.ref.relation_path == ("attributed-to->Alice Human",)
+    assert agent.ref.relation_path == ("attributed-to->AgentLens Bot",)
+    assert dict(human.metadata)["actor"] == "Alice Human"
+    assert dict(agent.metadata)["actor"] == "AgentLens Bot"
+    assert "human-generated social export" in human.text
+    assert "automated social export" in agent.text
