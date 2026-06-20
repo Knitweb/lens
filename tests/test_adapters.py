@@ -196,7 +196,21 @@ def test_contributed_origintrail_fixture_uses_dkg_id_as_ual():
     assert chunk.ref.node_id == "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
     assert dict(chunk.metadata)["adapter"] == "origintrail-ual"
     assert dict(chunk.metadata)["ual"] == ual
+    assert dict(chunk.metadata)["asset_id"] == "ka:origintrail:42"
+    assert dict(chunk.metadata)["assertion_id"] == "assertion:origintrail:42:public"
     assert "resolved Knowledge Asset" in chunk.text
+
+
+def test_contributed_origintrail_fixture_exercises_origintrail_adapter():
+    path = Path(__file__).parent / "fixtures" / "origintrail_knowledge_asset.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+
+    chunks = tuple(OriginTrailUALAdapter(doc).iter_chunks())
+
+    assert len(chunks) == 1
+    assert chunks[0].ref.source_uri == "did:dkg:otp:2043/0x1234567890123456789012345678901234567890/42"
+    assert dict(chunks[0].metadata)["asset_id"] == "ka:origintrail:42"
+    assert dict(chunks[0].metadata)["assertion_id"] == "assertion:origintrail:42:public"
 
 
 def test_origintrail_ual_adapter_rejects_non_object_assets():
@@ -498,9 +512,22 @@ def test_contributed_activitystreams_fixture_preserves_attributed_actors():
     by_node = {chunk.ref.node_id: chunk for chunk in chunks}
     human = by_node["urn:uuid:b59c258f-2877-448c-8f96-2679c65691c1"]
     agent = by_node["urn:uuid:e245a449-33b8-430c-ab2f-9dfc1c91c712"]
-    assert human.ref.relation_path == ("attributed-to->Alice Human",)
-    assert agent.ref.relation_path == ("attributed-to->AgentLens Bot",)
-    assert dict(human.metadata)["actor"] == "Alice Human"
-    assert dict(agent.metadata)["actor"] == "AgentLens Bot"
+    assert human.ref.relation_path == ("attributed-to->urn:human:alice",)
+    assert agent.ref.relation_path == ("attributed-to->urn:agent:agentlens",)
+    assert dict(human.metadata)["actor"] == "urn:human:alice"
+    assert dict(agent.metadata)["actor"] == "urn:agent:agentlens"
     assert "human-generated social export" in human.text
     assert "automated social export" in agent.text
+
+
+def test_contributed_activitystreams_fixture_exercises_activitystreams_adapter():
+    path = Path(__file__).parent / "fixtures" / "activitystreams_export.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+
+    chunks = tuple(ActivityStreamsAdapter(doc).iter_chunks())
+
+    assert len(chunks) == 2
+    by_actor = {dict(chunk.metadata)["actor"]: chunk for chunk in chunks}
+    assert "urn:human:alice" in by_actor
+    assert "urn:agent:agentlens" in by_actor
+    assert by_actor["urn:agent:agentlens"].ref.relation_path == ("attributed-to->urn:agent:agentlens",)

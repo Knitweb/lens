@@ -1,6 +1,8 @@
 {
   "@context": "https://schema.org",
   "@id": "did:dkg:otp:2043/0x1234567890123456789012345678901234567890/42",
+  "assetId": "ka:origintrail:42",
+  "assertionId": "assertion:origintrail:42:public",
   "@graph": [
     {
       "@id": "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
