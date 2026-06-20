@@ -48,6 +48,7 @@ lens export-context "What is Lens for?" README.md --out context.json
 lens render-context context.json --answer
 lens capabilities
 lens inspect-pulse tests/fixtures/pulse_web_export.json
+python tools/generate_pulse_fixture.py --pulse-src ../pulse/src
 python -m pytest
 ```
 
@@ -81,6 +82,10 @@ keys, embeddings, network access, or vector databases.
 `lens inspect-pulse` performs a read-only Pulse JSON-LD export shape check. It
 reports node, edge, UAL, and relation counts; it does not recompute canonical
 CIDs, verify signatures, import/export a Web, or mutate source graphs.
+
+`tools/generate_pulse_fixture.py` can refresh
+`tests/fixtures/pulse_real_web_export.json` from a local Pulse checkout. The
+generated fixture is committed as data so Lens remains dependency-free in CI.
 
 ## Context Bundles
 

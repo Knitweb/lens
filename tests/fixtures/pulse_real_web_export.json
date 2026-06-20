@@ -1,0 +1,96 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "debug-score": "knit:debugScore",
+    "deploy-location": "knit:deployLocation",
+    "dst": {
+      "@id": "knit:dst",
+      "@type": "@id"
+    },
+    "edges": "knit:edges",
+    "id": "@id",
+    "knit": "did:dkg:knitweb#",
+    "label": {
+      "@container": "@set",
+      "@id": "rdfs:label"
+    },
+    "metadata": "knit:metadata",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "record": "knit:record",
+    "rel": "knit:rel",
+    "reputation": "knit:reputation",
+    "src": {
+      "@id": "knit:src",
+      "@type": "@id"
+    },
+    "type": "@type",
+    "weight": "knit:weight"
+  },
+  "@graph": [
+    {
+      "edges": [
+        {
+          "dst": "bafyreigpolrt6sp2g4olw5vzg2knwxjldk6kvvhiwrd4bhj3fh5asielym",
+          "metadata": {
+            "deploy-location": "lens-fixture"
+          },
+          "rel": "supports",
+          "type": "KnitwebWebEdge",
+          "weight": 3
+        }
+      ],
+      "id": "bafyreic4wahvmqjiepzlknmt7rqeam4cjo4vp3yqplgjjsz5j6akuvmjpa",
+      "record": {
+        "body": "Human and agent interaction context can be cited without becoming a fabric store.",
+        "kind": "knowledge",
+        "tags": [
+          "human-agent",
+          "citation"
+        ],
+        "title": "Human agent interpretation note"
+      },
+      "type": "KnitwebWebNode",
+      "ual": "did:dkg:knitweb/bafyreic4wahvmqjiepzlknmt7rqeam4cjo4vp3yqplgjjsz5j6akuvmjpa"
+    },
+    {
+      "edges": [],
+      "id": "bafyreif36ujtcnzic4kozl35sq7qonidacfdxhipgpnlm7spkvssjd6ktm",
+      "record": {
+        "body": "Pulse export_web produced this content-addressed source record for Lens tests.",
+        "kind": "knowledge",
+        "tags": [
+          "pulse",
+          "fixture"
+        ],
+        "title": "Pulse export fixture root"
+      },
+      "type": "KnitwebWebNode",
+      "ual": "did:dkg:knitweb/bafyreif36ujtcnzic4kozl35sq7qonidacfdxhipgpnlm7spkvssjd6ktm"
+    },
+    {
+      "edges": [
+        {
+          "dst": "bafyreif36ujtcnzic4kozl35sq7qonidacfdxhipgpnlm7spkvssjd6ktm",
+          "metadata": {
+            "reputation": 9
+          },
+          "rel": "derived-from",
+          "type": "KnitwebWebEdge",
+          "weight": 2
+        }
+      ],
+      "id": "bafyreigpolrt6sp2g4olw5vzg2knwxjldk6kvvhiwrd4bhj3fh5asielym",
+      "record": {
+        "body": "Lens reads Pulse JSON-LD exports as read-only evidence and preserves citations.",
+        "kind": "knowledge",
+        "tags": [
+          "lens",
+          "interpret"
+        ],
+        "title": "Lens compatibility evidence"
+      },
+      "type": "KnitwebWebNode",
+      "ual": "did:dkg:knitweb/bafyreigpolrt6sp2g4olw5vzg2knwxjldk6kvvhiwrd4bhj3fh5asielym"
+    }
+  ]
+}

@@ -30,6 +30,10 @@ node, edge, UAL, and relation counts. This is consumer-side compatibility
 inspection only. Pulse still owns canonical CID recomputation, signed
 attestation, Web import/export round-trips, mutation, transport, and storage.
 
+`tools/generate_pulse_fixture.py` refreshes the real Pulse fixture by importing
+Pulse `export_web` from a local checkout. The generated JSON is committed as
+plain data, so Lens CI and users do not need Pulse installed.
+
 ## OriginTrail Snapshots
 
 Lens can read already-resolved OriginTrail Knowledge Asset snapshots and carry
