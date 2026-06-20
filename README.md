@@ -49,6 +49,7 @@ lens render-context context.json --answer
 lens query "How do graph rows work?" examples/neo4j_rows.json --json
 lens query "How are vector scores handled?" examples/vector_results.json --json
 lens query "What should Lens preserve from social exports?" examples/activitystreams_collection.json --json
+lens query "What did OriginTrail resolve?" examples/origintrail_resolved_asset.json --json
 lens capabilities
 lens inspect-pulse tests/fixtures/pulse_web_export.json
 python tools/generate_pulse_fixture.py --pulse-src ../pulse/src
@@ -157,6 +158,7 @@ activity/collection exports, graph rows, and vector results.
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Compatibility boundary](docs/COMPATIBILITY.md)
+- [OriginTrail fixture examples](docs/ORIGINTRAIL_FIXTURES.md)
 - [Pulse backlog extraction](docs/PULSE_BACKLOG.md)
 - [Project 2 sync instructions](docs/PROJECT2_SYNC.md)
 - [Evals](docs/EVALS.md)

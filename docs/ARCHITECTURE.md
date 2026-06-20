@@ -45,6 +45,10 @@ grounding evidence without making Lens a DKG client. UAL resolution, SPARQL
 querying, asset publishing, assertion anchoring, and node connectivity stay with
 OriginTrail tooling.
 
+`examples/origintrail_resolved_asset.json` shows the accepted static fixture
+shape. See `docs/ORIGINTRAIL_FIXTURES.md` for how to produce a resolved snapshot
+with external DKG tooling while keeping the Lens base package dependency-free.
+
 ## Human And Agent Interactions
 
 Lens can consume exported human/agent interaction logs as read-only evidence.

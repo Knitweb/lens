@@ -160,6 +160,27 @@ def test_local_files_adapter_loads_origintrail_snapshot_before_generic_jsonld(tm
     assert chunks[0].metadata[0] == ("adapter", "origintrail-ual")
 
 
+def test_origintrail_example_fixture_preserves_ual_and_relations():
+    path = Path(__file__).parent.parent / "examples" / "origintrail_resolved_asset.json"
+    ual = "did:dkg:otp:2043/0x5afe000000000000000000000000000000000123/17"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 2
+    by_node = {chunk.ref.node_id: chunk for chunk in chunks}
+    assert by_node["urn:ot:batch:17"].ref.source_uri == ual
+    assert by_node["urn:ot:batch:17"].ref.relation_path == (
+        "derived-from->urn:ot:material:7",
+        "same-as->did:dkg:knitweb/bafyreif36ujtcnzic4kozl35sq7qonidacfdxhipgpnlm7spkvssjd6ktm",
+    )
+    assert by_node["urn:ot:attestation:17"].ref.relation_path == (
+        "subject->urn:ot:batch:17",
+        "predicate->reviewed-by",
+        "object->urn:ot:reviewer:lens",
+    )
+    assert dict(by_node["urn:ot:attestation:17"].metadata)["assertion_id"] == "assertion:origintrail:17:public"
+
+
 def test_origintrail_ual_adapter_rejects_non_object_assets():
     with pytest.raises(ValueError, match="OriginTrail assets must be objects"):
         OriginTrailUALAdapter(["bad"])

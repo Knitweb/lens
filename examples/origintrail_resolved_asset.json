@@ -1,0 +1,37 @@
+{
+  "ual": "did:dkg:otp:2043/0x5afe000000000000000000000000000000000123/17",
+  "assetId": "ka:origintrail:17",
+  "assertionId": "assertion:origintrail:17:public",
+  "publicAssertion": {
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "knit": "did:dkg:knitweb#",
+      "sameAs": {
+        "@id": "https://schema.org/sameAs",
+        "@type": "@id"
+      }
+    },
+    "@graph": [
+      {
+        "@id": "urn:ot:batch:17",
+        "title": "Resolved batch provenance",
+        "description": "An external OriginTrail DKG client resolved this Knowledge Asset snapshot before Lens read it.",
+        "sameAs": "did:dkg:knitweb/bafyreif36ujtcnzic4kozl35sq7qonidacfdxhipgpnlm7spkvssjd6ktm",
+        "edges": [
+          {
+            "type": "derived-from",
+            "target": "urn:ot:material:7"
+          }
+        ]
+      },
+      {
+        "@id": "urn:ot:attestation:17",
+        "title": "Assertion review note",
+        "description": "Lens preserves the UAL and assertion id as citation metadata without publishing or anchoring anything.",
+        "subject": "urn:ot:batch:17",
+        "predicate": "reviewed-by",
+        "object": "urn:ot:reviewer:lens"
+      }
+    ]
+  }
+}
