@@ -118,6 +118,7 @@ Implemented in v1:
 - `JsonLdAdapter` for Pulse/Knitweb JSON-LD exports.
 - `RdfJsonLdAdapter` for generic JSON-LD graph documents.
 - `LocalFilesAdapter` for Markdown, text, JSON, and JSON-LD files.
+- `InteractionLogAdapter` for exported human/agent interaction logs.
 - `MappingRowsAdapter` for Neo4j/LightRAG-style row dictionaries.
 - `VectorResultsAdapter` for vector-store result dictionaries.
 

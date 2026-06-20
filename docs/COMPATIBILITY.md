@@ -46,6 +46,10 @@ not publish assets, anchor state, or present itself as a DKG implementation.
 - Local text, Markdown, and JSON files.
 - Human/agent interaction logs represented as read-only rows or JSON.
 
+Interaction logs are compatibility inputs only. Lens may interpret them and cite
+their event ids, actors, timestamps, reply links, and target CIDs. Lens must not
+become the durable interaction store, agent orchestrator, or identity authority.
+
 ## Guardrail
 
 Run:
@@ -58,4 +62,3 @@ The output is a machine-readable contract. New features should extend Lens only
 inside `owned_capabilities`. If a proposed feature belongs under
 `delegated_to_knitweb` or `delegated_to_origintrail`, Lens should integrate with
 that system instead of reimplementing it.
-

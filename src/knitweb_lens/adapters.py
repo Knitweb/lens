@@ -143,6 +143,93 @@ class FabricWebAdapter:
             )
 
 
+def _event_text(event: dict[str, Any]) -> str:
+    for key in ("text", "message", "content", "body", "summary", "observation"):
+        value = event.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return record_to_text(event)
+
+
+def _event_relation_path(event: dict[str, Any]) -> tuple[str, ...]:
+    path: list[str] = []
+    for key, rel in (
+        ("in_reply_to", "reply-to"),
+        ("parent_id", "reply-to"),
+        ("target", "targets"),
+        ("target_cid", "targets"),
+        ("cid", "mentions"),
+        ("tool_call_id", "tool-call"),
+    ):
+        value = event.get(key)
+        if isinstance(value, str) and value.strip():
+            path.append(f"{rel}->{value.strip()}")
+    path.extend(_edge_path(event.get("edges") or event.get("relationships") or ()))
+    return tuple(path)
+
+
+class InteractionLogAdapter:
+    """Adapter for read-only human/agent interaction logs.
+
+    This consumes exported interaction records. It does not become a chat store,
+    identity layer, agent runtime, or event bus.
+    """
+
+    def __init__(
+        self,
+        events: Iterable[dict[str, Any]],
+        *,
+        source_id: str = "interaction-log",
+        source_uri: str = "",
+        priority: int = 65,
+    ) -> None:
+        self._events = tuple(events)
+        self._source_id = source_id
+        self._source_uri = source_uri
+        self._priority = priority
+
+    @property
+    def source_id(self) -> str:
+        return self._source_id
+
+    def iter_chunks(self) -> Iterable[Chunk]:
+        for index, event in enumerate(self._events):
+            if not isinstance(event, dict):
+                raise ValueError("interaction log events must be objects")
+            text = _event_text(event)
+            if not text.strip():
+                continue
+            event_id = str(event.get("id") or stable_id("interaction-event", event))
+            actor = str(event.get("actor") or event.get("author") or event.get("speaker") or "")
+            actor_type = str(event.get("actor_type") or event.get("role") or "unknown")
+            title = event.get("title")
+            if not isinstance(title, str) or not title.strip():
+                title = " ".join(part for part in (actor_type, actor) if part).strip() or event_id
+            ref = ChunkRef(
+                source_id=self._source_id,
+                source_uri=str(event.get("source_uri") or self._source_uri),
+                cid=str(event["cid"]) if event.get("cid") else None,
+                node_id=event_id,
+                relation_path=_event_relation_path(event),
+            )
+            yield Chunk(
+                ref=ref,
+                title=title,
+                text=text,
+                record=event,
+                priority=self._priority,
+                weight=int(event.get("weight", 1)),
+                distance=int(event.get("distance", 0)),
+                metadata=_metadata(
+                    index=index,
+                    adapter="interaction-log",
+                    actor=actor or None,
+                    actor_type=actor_type,
+                    timestamp=str(event.get("timestamp")) if event.get("timestamp") is not None else None,
+                ),
+            )
+
+
 class LocalFilesAdapter:
     """Adapter for local Markdown, text, JSON, and JSON-LD files."""
 
@@ -172,6 +259,18 @@ class LocalFilesAdapter:
                 if isinstance(data, dict) and "@graph" in data:
                     adapter = JsonLdAdapter(
                         data,
+                        source_id=f"{self._source_id}:{path.name}",
+                        source_uri=str(path),
+                        priority=self._priority,
+                    )
+                    yield from adapter.iter_chunks()
+                    continue
+                if isinstance(data, dict) and ("interactions" in data or "events" in data):
+                    events = data.get("interactions") if "interactions" in data else data.get("events")
+                    if not isinstance(events, list):
+                        raise ValueError("interaction JSON events must be a list")
+                    adapter = InteractionLogAdapter(
+                        events,
                         source_id=f"{self._source_id}:{path.name}",
                         source_uri=str(path),
                         priority=self._priority,

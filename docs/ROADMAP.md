@@ -5,6 +5,9 @@ portable context bundles, a CLI, a small HTTP route, tests, GitHub Pages, and
 starter contributor issues. The next work should deepen reliability and make
 Pulse integration more real.
 
+It now also accepts exported human/agent interaction logs as read-only evidence,
+without becoming an interaction store or agent runtime.
+
 ## Current Priorities
 
 ### 1. Real Pulse Fixture

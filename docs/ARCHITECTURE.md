@@ -21,6 +21,13 @@ Lens v1 is an ephemeral interpret layer over content-addressed fabric data.
 4. An `LLMAdapter` turns selected chunks into an answer.
 5. `InterpretAnswer` returns text plus citations back to each `ChunkRef`.
 
+## Human And Agent Interactions
+
+Lens can consume exported human/agent interaction logs as read-only evidence.
+Those logs are treated as source rows with actors, timestamps, reply links, and
+target CIDs preserved in citations. Lens does not become a chat product, agent
+runtime, event bus, or identity system.
+
 ## Context Bundles
 
 Lens context bundles are portable JSON snapshots of the interpret context. They

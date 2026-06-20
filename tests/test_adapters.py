@@ -3,7 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from knitweb_lens import JsonLdAdapter, LocalFilesAdapter, MappingRowsAdapter, RLMHarness, VectorResultsAdapter
+from knitweb_lens import (
+    InteractionLogAdapter,
+    JsonLdAdapter,
+    LocalFilesAdapter,
+    MappingRowsAdapter,
+    RLMHarness,
+    VectorResultsAdapter,
+)
 
 
 def test_jsonld_adapter_preserves_cid_and_edges():
@@ -101,3 +108,67 @@ def test_local_files_adapter_reports_invalid_json(tmp_path):
 
     with pytest.raises(ValueError, match="invalid JSON"):
         tuple(LocalFilesAdapter([path]).iter_chunks())
+
+
+def test_interaction_log_adapter_preserves_human_agent_context():
+    events = [
+        {
+            "id": "m1",
+            "actor": "Ada",
+            "actor_type": "human",
+            "message": "Please make Lens compatible with Knitweb without duplicating OriginTrail.",
+            "timestamp": "2026-06-20T12:00:00Z",
+        },
+        {
+            "id": "m2",
+            "actor": "agent",
+            "actor_type": "agent",
+            "in_reply_to": "m1",
+            "target_cid": "bafyfabric",
+            "message": "Lens should interpret exported fabric data and preserve citations.",
+        },
+    ]
+
+    chunks = tuple(InteractionLogAdapter(events, source_uri="chat.json").iter_chunks())
+
+    assert len(chunks) == 2
+    assert chunks[0].title == "human Ada"
+    assert chunks[0].ref.node_id == "m1"
+    assert chunks[0].metadata == (
+        ("actor", "Ada"),
+        ("actor_type", "human"),
+        ("adapter", "interaction-log"),
+        ("index", 0),
+        ("timestamp", "2026-06-20T12:00:00Z"),
+    )
+    assert chunks[1].ref.relation_path == ("reply-to->m1", "targets->bafyfabric")
+
+
+def test_local_files_adapter_loads_interaction_json(tmp_path):
+    path = tmp_path / "chat.json"
+    path.write_text(
+        json.dumps(
+            {
+                "events": [
+                    {
+                        "id": "e1",
+                        "role": "human",
+                        "content": "Human feedback should be cited in Lens interpretation.",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 1
+    assert chunks[0].ref.source_id == "local-files:chat.json"
+    assert chunks[0].ref.node_id == "e1"
+    assert "Human feedback" in chunks[0].text
+
+
+def test_interaction_log_adapter_rejects_non_object_events():
+    with pytest.raises(ValueError, match="interaction log events must be objects"):
+        tuple(InteractionLogAdapter(["bad"]).iter_chunks())

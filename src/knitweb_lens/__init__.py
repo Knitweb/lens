@@ -2,6 +2,7 @@
 
 from .adapters import (
     FabricWebAdapter,
+    InteractionLogAdapter,
     JsonLdAdapter,
     LocalFilesAdapter,
     MappingRowsAdapter,
@@ -35,6 +36,7 @@ __all__ = [
     "FabricWebAdapter",
     "InterpretAnswer",
     "InterpretSession",
+    "InteractionLogAdapter",
     "EvalCase",
     "JsonLdAdapter",
     "LLMAdapter",
