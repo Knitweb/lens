@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "id": "metta:atom:lens-compatibility",
+      "atom_type": "Expression",
+      "title": "MeTTa compatibility atom",
+      "expression": "(compatible Lens Knitweb OriginTrail)",
+      "content": "Lens can interpret exported Hyperon/MeTTa-style atom rows while Knitweb keeps fabric storage and OriginTrail keeps DKG resolution, publishing, and anchoring.",
+      "path": [
+        {
+          "rel": "uses-symbol",
+          "dst": "metta:symbol:Lens"
+        },
+        {
+          "rel": "compatible-with",
+          "dst": "metta:symbol:Knitweb"
+        },
+        {
+          "rel": "compatible-with",
+          "dst": "metta:symbol:OriginTrail"
+        }
+      ],
+      "weight": 4,
+      "source_uri": "metta-export://lens/examples/session-1"
+    },
+    {
+      "id": "metta:atom:runtime-boundary",
+      "atom_type": "Expression",
+      "title": "MeTTa runtime boundary atom",
+      "expression": "(not (becomes Lens AtomspaceRuntime))",
+      "content": "Hyperon/MeTTa remains the source runtime for Atomspace queries. Lens reads exported atoms as evidence; it does not store atoms, evaluate MeTTa programs, or execute grounded atoms.",
+      "path": [
+        {
+          "rel": "constrains",
+          "dst": "metta:atom:lens-compatibility"
+        },
+        {
+          "rel": "delegates-runtime-to",
+          "dst": "hyperon:metta"
+        }
+      ],
+      "weight": 5,
+      "source_uri": "metta-export://lens/examples/session-1"
+    }
+  ]
+}

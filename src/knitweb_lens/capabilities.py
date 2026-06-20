@@ -17,6 +17,7 @@ COMPATIBLE_READ_MODELS = (
     "local-text-json-markdown",
     "human-agent-interaction-log",
     "activitystreams-object-or-collection",
+    "hyperon-metta-atom-export-row",
 )
 
 OWNED_CAPABILITIES = (
@@ -59,6 +60,9 @@ NON_GOALS = DELEGATED_TO_KNITWEB + DELEGATED_TO_ORIGINTRAIL + (
     "activitypub-inbox-outbox-delivery",
     "activitypub-federated-server",
     "social-graph-moderation",
+    "atomspace-storage",
+    "metta-runtime-evaluation",
+    "grounded-atom-execution",
 )
 
 

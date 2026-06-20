@@ -49,6 +49,17 @@ OriginTrail tooling.
 shape. See `docs/ORIGINTRAIL_FIXTURES.md` for how to produce a resolved snapshot
 with external DKG tooling while keeping the Lens base package dependency-free.
 
+## Hyperon/MeTTa Atom Exports
+
+Lens can read static Hyperon/MeTTa-style atom exports as `MappingRowsAdapter`
+input. Atom ids map to chunk node ids, atom types are preserved as row metadata,
+content becomes grounding text, and exported paths become citation relation
+paths. Hyperon remains the Atomspace, pattern-matching, evaluation, grounded
+atom, and runtime-mutation layer.
+
+`examples/metta_atom_rows.json` shows the dependency-free fixture shape. See
+`docs/METTA_ATOM_EXPORTS.md` for the supported row fields and boundary.
+
 ## Human And Agent Interactions
 
 Lens can consume exported human/agent interaction logs as read-only evidence.
@@ -134,4 +145,6 @@ The serialized reliability report carries `status` as `answered` or
 - No Knitweb/Pulse fabric storage, p2p replication, ledger/accounting,
   canonical CID generation, Web mutation, or signed-record attestation.
 - No OriginTrail DKG publishing, UAL resolution, anchoring, or asset discovery.
+- No Hyperon Atomspace storage, MeTTa runtime evaluation, or grounded atom
+  execution.
 - No ranking floats in returned metadata.

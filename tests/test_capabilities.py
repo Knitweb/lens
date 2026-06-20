@@ -16,6 +16,7 @@ def test_compatibility_report_separates_lens_from_knitweb_and_origintrail():
     assert "origintrail-resolved-asset-snapshot" in report["compatible_read_models"]
     assert "human-agent-interaction-log" in report["compatible_read_models"]
     assert "activitystreams-object-or-collection" in report["compatible_read_models"]
+    assert "hyperon-metta-atom-export-row" in report["compatible_read_models"]
     assert "ephemeral-interpret-session" in report["owned_capabilities"]
     assert "pulse-export-shape-inspection" in report["owned_capabilities"]
     assert "citation-preserving-prompt-rendering" in report["owned_capabilities"]
@@ -23,6 +24,7 @@ def test_compatibility_report_separates_lens_from_knitweb_and_origintrail():
     assert "dkg-asset-publishing" in report["delegated_to_origintrail"]
     assert "dkg-querying-and-node-connectivity" in report["delegated_to_origintrail"]
     assert "activitypub-federated-server" in report["non_goals"]
+    assert "metta-runtime-evaluation" in report["non_goals"]
 
 
 def test_owned_capabilities_do_not_duplicate_delegated_system_features():

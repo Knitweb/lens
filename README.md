@@ -50,6 +50,7 @@ lens query "How do graph rows work?" examples/neo4j_rows.json --json
 lens query "How are vector scores handled?" examples/vector_results.json --json
 lens query "What should Lens preserve from social exports?" examples/activitystreams_collection.json --json
 lens query "What did OriginTrail resolve?" examples/origintrail_resolved_asset.json --json
+lens query "Does Lens become a MeTTa runtime?" examples/metta_atom_rows.json --json
 lens capabilities
 lens inspect-pulse tests/fixtures/pulse_web_export.json
 python tools/generate_pulse_fixture.py --pulse-src ../pulse/src
@@ -152,13 +153,15 @@ For the model side, use `render_model_prompt` and the `LLMAdapter` protocol
 described in [Optional live model adapters](docs/LIVE_ADAPTERS.md).
 
 Runnable examples live under `examples/`, including ActivityStreams single
-activity/collection exports, graph rows, and vector results.
+activity/collection exports, OriginTrail snapshots, Hyperon/MeTTa-style atom
+exports, graph rows, and vector results.
 
 ## Project Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Compatibility boundary](docs/COMPATIBILITY.md)
 - [OriginTrail fixture examples](docs/ORIGINTRAIL_FIXTURES.md)
+- [Hyperon/MeTTa atom exports](docs/METTA_ATOM_EXPORTS.md)
 - [Pulse backlog extraction](docs/PULSE_BACKLOG.md)
 - [Project 2 sync instructions](docs/PROJECT2_SYNC.md)
 - [Evals](docs/EVALS.md)

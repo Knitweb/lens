@@ -50,6 +50,7 @@ def test_mapping_rows_adapter_accepts_graph_rows():
     rows = [
         {
             "id": "n1",
+            "type": "Claim",
             "title": "Light graph",
             "text": "Graph rows can come from Neo4j or LightRAG.",
             "path": [{"rel": "supports", "dst": "n0"}],
@@ -60,6 +61,7 @@ def test_mapping_rows_adapter_accepts_graph_rows():
 
     assert chunk.ref.node_id == "n1"
     assert chunk.ref.relation_path == ("supports->n0",)
+    assert dict(chunk.metadata)["row_type"] == "Claim"
 
 
 def test_vector_results_quantize_float_scores_to_integer_weight():
@@ -283,6 +285,31 @@ def test_local_files_adapter_loads_mapping_rows_json(tmp_path):
     assert len(chunks) == 1
     assert chunks[0].ref.source_id == "local-files:neo4j_rows.json"
     assert chunks[0].ref.relation_path == ("supports->row:0",)
+
+
+def test_metta_atom_rows_fixture_maps_exported_atoms_to_chunks():
+    path = Path(__file__).parent.parent / "examples" / "metta_atom_rows.json"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 2
+    by_node = {chunk.ref.node_id: chunk for chunk in chunks}
+    compatibility = by_node["metta:atom:lens-compatibility"]
+    boundary = by_node["metta:atom:runtime-boundary"]
+    assert compatibility.ref.source_uri == "metta-export://lens/examples/session-1"
+    assert compatibility.record["atom_type"] == "Expression"
+    assert compatibility.record["expression"] == "(compatible Lens Knitweb OriginTrail)"
+    assert compatibility.ref.relation_path == (
+        "uses-symbol->metta:symbol:Lens",
+        "compatible-with->metta:symbol:Knitweb",
+        "compatible-with->metta:symbol:OriginTrail",
+    )
+    assert dict(compatibility.metadata)["row_type"] == "Expression"
+    assert boundary.ref.relation_path == (
+        "constrains->metta:atom:lens-compatibility",
+        "delegates-runtime-to->hyperon:metta",
+    )
+    assert "does not store atoms" in boundary.text
 
 
 def test_local_files_adapter_loads_vector_results_json(tmp_path):

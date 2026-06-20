@@ -199,6 +199,7 @@
       <a href="./ARCHITECTURE.md">Architecture</a>
       <a href="./COMPATIBILITY.md">Boundary</a>
       <a href="./ORIGINTRAIL_FIXTURES.md">OriginTrail</a>
+      <a href="./METTA_ATOM_EXPORTS.md">MeTTa</a>
       <a href="./PULSE_BACKLOG.md">Pulse Backlog</a>
       <a href="./EVALS.md">Evals</a>
       <a href="./LIVE_ADAPTERS.md">Live Adapters</a>
@@ -229,6 +230,7 @@ lens query "How do graph rows work?" examples/neo4j_rows.json --json
 lens query "How are vector scores handled?" examples/vector_results.json --json
 lens query "What should Lens preserve from social exports?" examples/activitystreams_collection.json --json
 lens query "What did OriginTrail resolve?" examples/origintrail_resolved_asset.json --json
+lens query "Does Lens become a MeTTa runtime?" examples/metta_atom_rows.json --json
 lens inspect-pulse tests/fixtures/pulse_web_export.json
 python -m pytest</code></pre>
     </div>
@@ -256,7 +258,7 @@ python -m pytest</code></pre>
         </section>
         <section>
           <h2>Graph Rows</h2>
-          <p>Accepts Neo4j, LightRAG, vector-result, JSON, Markdown, and text rows through small dependency-free adapters and runnable examples.</p>
+          <p>Accepts Neo4j, LightRAG, Hyperon/MeTTa atom exports, vector-result, JSON, Markdown, and text rows through small dependency-free adapters and runnable examples.</p>
         </section>
         <section>
           <h2>Context Bundles</h2>
@@ -271,7 +273,7 @@ python -m pytest</code></pre>
       </div>
       <div class="grid">
         <section>
-          <div class="metric">50</div>
+          <div class="metric">63</div>
           <p>Offline tests covering adapters, CLI, reliability, evals, context bundles, and Pulse export inspection.</p>
         </section>
         <section>
@@ -305,6 +307,7 @@ python -m pytest</code></pre>
             <li>Knitweb/Pulse owns fabric storage, canonical CID generation, signing, mutation, transport, and ledger behavior.</li>
             <li>OriginTrail owns UAL resolution, DKG querying, publishing, anchoring, and network discovery.</li>
             <li>ActivityPub systems own inbox/outbox delivery, federation, moderation, and social graph storage.</li>
+            <li>Hyperon/MeTTa owns Atomspace storage, evaluation, grounded atoms, and runtime mutation.</li>
           </ul>
         </section>
       </div>
@@ -317,7 +320,7 @@ python -m pytest</code></pre>
       <div class="grid">
       <section>
           <h2>Adapter Fixtures</h2>
-        <p>Bring small real exports from Pulse, OriginTrail, ActivityStreams, LightRAG, Neo4j, vector stores, or local agent logs.</p>
+        <p>Bring small real exports from Pulse, OriginTrail, ActivityStreams, Hyperon/MeTTa, LightRAG, Neo4j, vector stores, or local agent logs.</p>
       </section>
         <section>
           <h2>Reliability</h2>

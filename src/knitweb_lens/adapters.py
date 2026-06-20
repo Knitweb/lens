@@ -93,6 +93,14 @@ def _edge_path(edges: Iterable[Any]) -> tuple[str, ...]:
     return tuple(path)
 
 
+def _row_type(row: dict[str, Any]) -> str | None:
+    for key in ("atom_type", "type", "kind"):
+        value = row.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
 def _metadata(**values: str | int | None) -> tuple[tuple[str, str | int | None], ...]:
     return tuple(sorted(values.items()))
 
@@ -783,7 +791,7 @@ class MappingRowsAdapter:
                 priority=self._priority,
                 weight=int(weight),
                 distance=int(distance),
-                metadata=_metadata(index=index, adapter="mapping-rows"),
+                metadata=_metadata(index=index, adapter="mapping-rows", row_type=_row_type(row)),
             )
 
 

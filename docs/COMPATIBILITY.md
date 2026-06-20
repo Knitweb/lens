@@ -51,6 +51,7 @@ not publish assets, anchor state, or present itself as a DKG implementation.
 - Local text, Markdown, and JSON files.
 - Human/agent interaction logs represented as read-only rows or JSON.
 - ActivityStreams objects and collections exported from social or agent systems.
+- Hyperon/MeTTa-style atom exports represented as read-only graph rows.
 
 Interaction logs are compatibility inputs only. Lens may interpret them and cite
 their event ids, actors, timestamps, reply links, and target CIDs. Lens must not
@@ -65,6 +66,11 @@ OriginTrail snapshots are compatibility inputs only. Lens may preserve UALs,
 assertion ids, asset ids, and graph records in citations. Lens must not perform
 UAL resolution, DKG querying, publishing, anchoring, token operations, or node
 connectivity.
+
+Hyperon/MeTTa atom exports are compatibility inputs only. Lens may preserve atom
+ids, atom types, source URIs, expressions, and relation paths. Lens must not
+store an Atomspace, evaluate MeTTa programs, execute grounded atoms, or mutate a
+Hyperon runtime.
 
 ## Guardrail
 
