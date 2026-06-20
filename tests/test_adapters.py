@@ -372,3 +372,54 @@ def test_local_files_adapter_loads_activitystreams_collection(tmp_path):
 def test_activitystreams_adapter_rejects_non_object_items():
     with pytest.raises(ValueError, match="ActivityStreams items must be objects"):
         tuple(ActivityStreamsAdapter({"orderedItems": ["bad"]}).iter_chunks())
+
+
+def test_activitystreams_single_fixture_preserves_social_evidence():
+    path = Path(__file__).parent.parent / "examples" / "activitystreams_single.json"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 1
+    chunk = chunks[0]
+    assert chunk.ref.source_id == "local-files:activitystreams_single.json"
+    assert chunk.ref.node_id == "https://social.example/activities/lens-1"
+    assert chunk.ref.relation_path == (
+        "actor->https://social.example/users/ada",
+        "object->https://social.example/notes/lens-1",
+        "attributed-to->https://social.example/users/ada",
+        "reply-to->https://social.example/notes/root",
+        "audience-to->https://www.w3.org/ns/activitystreams#Public",
+        "audience-cc->https://social.example/users/agent",
+        "tag->https://social.example/users/agent",
+    )
+    assert "leaving ActivityPub delivery to the source system" in chunk.text
+    assert chunk.metadata == (
+        ("activity_type", "Create"),
+        ("actor", "https://social.example/users/ada"),
+        ("adapter", "activitystreams"),
+        ("index", 0),
+        ("published", "2026-06-20T13:15:00Z"),
+    )
+
+
+def test_activitystreams_collection_fixture_preserves_human_agent_context():
+    path = Path(__file__).parent.parent / "examples" / "activitystreams_collection.json"
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 2
+    refs_by_node = {chunk.ref.node_id: chunk.ref for chunk in chunks}
+    assert refs_by_node["https://social.example/activities/human-request"].relation_path == (
+        "actor->https://social.example/users/operator",
+        "object->https://social.example/notes/human-request",
+        "audience-to->https://www.w3.org/ns/activitystreams#Public",
+        "tag->https://social.example/users/lens-agent",
+    )
+    assert refs_by_node["https://social.example/activities/agent-response"].relation_path == (
+        "actor->https://social.example/users/lens-agent",
+        "object->https://social.example/notes/agent-response",
+        "reply-to->https://social.example/notes/human-request",
+        "audience-cc->https://social.example/groups/reviewers",
+        "tag->https://social.example/users/operator",
+    )
+    assert all(dict(chunk.metadata)["adapter"] == "activitystreams" for chunk in chunks)

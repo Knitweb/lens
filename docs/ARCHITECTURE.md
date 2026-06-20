@@ -58,6 +58,11 @@ and publication fields in chunk references and metadata. It does not implement
 ActivityPub inbox/outbox delivery, follow side effects, federation, moderation,
 or social graph storage.
 
+`examples/activitystreams_single.json` and
+`examples/activitystreams_collection.json` provide runnable fixtures for this
+surface. They are exported evidence shapes only; Lens does not send, receive, or
+moderate ActivityPub traffic.
+
 ## Graph And Vector Rows
 
 `LocalFilesAdapter` recognizes JSON fixtures with `rows` as graph-query rows

@@ -1,0 +1,50 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "OrderedCollection",
+  "id": "https://social.example/outbox/lens",
+  "orderedItems": [
+    {
+      "type": "Create",
+      "id": "https://social.example/activities/human-request",
+      "actor": "https://social.example/users/operator",
+      "published": "2026-06-20T13:16:00Z",
+      "to": [
+        "https://www.w3.org/ns/activitystreams#Public"
+      ],
+      "object": {
+        "type": "Note",
+        "id": "https://social.example/notes/human-request",
+        "content": "Please cite the fabric record and keep social delivery outside Lens.",
+        "tag": [
+          {
+            "type": "Mention",
+            "href": "https://social.example/users/lens-agent",
+            "name": "@lens-agent"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Create",
+      "id": "https://social.example/activities/agent-response",
+      "actor": "https://social.example/users/lens-agent",
+      "published": "2026-06-20T13:17:00Z",
+      "cc": [
+        "https://social.example/groups/reviewers"
+      ],
+      "object": {
+        "type": "Note",
+        "id": "https://social.example/notes/agent-response",
+        "content": "The answer should preserve ActivityStreams actor, reply, audience, and mention citations.",
+        "inReplyTo": "https://social.example/notes/human-request",
+        "tag": [
+          {
+            "type": "Mention",
+            "href": "https://social.example/users/operator",
+            "name": "@operator"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Create",
+  "id": "https://social.example/activities/lens-1",
+  "actor": "https://social.example/users/ada",
+  "published": "2026-06-20T13:15:00Z",
+  "to": [
+    "https://www.w3.org/ns/activitystreams#Public"
+  ],
+  "cc": [
+    "https://social.example/users/agent"
+  ],
+  "object": {
+    "type": "Note",
+    "id": "https://social.example/notes/lens-1",
+    "attributedTo": "https://social.example/users/ada",
+    "content": "<p>Lens should read social exports as evidence while leaving ActivityPub delivery to the source system.</p>",
+    "inReplyTo": "https://social.example/notes/root",
+    "tag": [
+      {
+        "type": "Mention",
+        "href": "https://social.example/users/agent",
+        "name": "@agent"
+      }
+    ]
+  }
+}

@@ -48,6 +48,7 @@ lens export-context "What is Lens for?" README.md --out context.json
 lens render-context context.json --answer
 lens query "How do graph rows work?" examples/neo4j_rows.json --json
 lens query "How are vector scores handled?" examples/vector_results.json --json
+lens query "What should Lens preserve from social exports?" examples/activitystreams_collection.json --json
 lens capabilities
 lens inspect-pulse tests/fixtures/pulse_web_export.json
 python tools/generate_pulse_fixture.py --pulse-src ../pulse/src
@@ -148,6 +149,9 @@ Optional live integrations should wrap these adapters instead of making Lens
 depend on a service SDK.
 For the model side, use `render_model_prompt` and the `LLMAdapter` protocol
 described in [Optional live model adapters](docs/LIVE_ADAPTERS.md).
+
+Runnable examples live under `examples/`, including ActivityStreams single
+activity/collection exports, graph rows, and vector results.
 
 ## Project Docs
 

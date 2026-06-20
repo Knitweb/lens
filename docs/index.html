@@ -226,6 +226,7 @@
 lens query "What does Lens preserve?" README.md --json
 lens query "How do graph rows work?" examples/neo4j_rows.json --json
 lens query "How are vector scores handled?" examples/vector_results.json --json
+lens query "What should Lens preserve from social exports?" examples/activitystreams_collection.json --json
 lens inspect-pulse tests/fixtures/pulse_web_export.json
 python -m pytest</code></pre>
     </div>
@@ -245,7 +246,7 @@ python -m pytest</code></pre>
         </section>
         <section>
           <h2>ActivityStreams</h2>
-          <p>Reads exported social objects and collections while preserving actors, objects, replies, targets, tags, and audiences.</p>
+          <p>Reads exported social objects and collections while preserving actors, objects, replies, targets, tags, audiences, and publication timestamps.</p>
         </section>
         <section>
           <h2>Interaction Logs</h2>
