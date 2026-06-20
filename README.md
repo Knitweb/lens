@@ -26,6 +26,8 @@ p2p/crypto systems without inheriting their heavy runtime dependencies:
 - symbolic atom/chunk iteration, inspired by MeTTa over Atomspace;
 - content-derived identity and tamper visibility, aligned with CID/DID/VC
   practice;
+- read-only ActivityStreams ingestion for social/human-agent traces without
+  ActivityPub server behavior;
 - no background daemon or channel bridge in the core, keeping the ClaudeClaw
   lesson of isolation and explicit boundaries.
 
@@ -119,6 +121,7 @@ Implemented in v1:
 - `RdfJsonLdAdapter` for generic JSON-LD graph documents.
 - `LocalFilesAdapter` for Markdown, text, JSON, and JSON-LD files.
 - `InteractionLogAdapter` for exported human/agent interaction logs.
+- `ActivityStreamsAdapter` for exported ActivityStreams objects and collections.
 - `MappingRowsAdapter` for Neo4j/LightRAG-style row dictionaries.
 - `VectorResultsAdapter` for vector-store result dictionaries.
 

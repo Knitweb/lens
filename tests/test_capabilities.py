@@ -14,9 +14,11 @@ def test_compatibility_report_separates_lens_from_knitweb_and_origintrail():
     assert "knitweb-pulse-jsonld-export" in report["compatible_read_models"]
     assert "origintrail-dkg-ual-citation" in report["compatible_read_models"]
     assert "human-agent-interaction-log" in report["compatible_read_models"]
+    assert "activitystreams-object-or-collection" in report["compatible_read_models"]
     assert "ephemeral-interpret-session" in report["owned_capabilities"]
     assert "p2p-transport-and-replication" in report["delegated_to_knitweb"]
     assert "dkg-asset-publishing" in report["delegated_to_origintrail"]
+    assert "activitypub-federated-server" in report["non_goals"]
 
 
 def test_owned_capabilities_do_not_duplicate_delegated_system_features():
@@ -36,4 +38,3 @@ def test_cli_capabilities_outputs_machine_readable_contract(capsys):
     assert payload["requires_knitweb_runtime"] is False
     assert payload["requires_origintrail_runtime"] is False
     assert "canonical-cbor-cid-generation" in payload["non_goals"]
-

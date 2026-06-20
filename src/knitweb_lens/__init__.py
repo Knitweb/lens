@@ -1,6 +1,7 @@
 """Lens: pure-Python interpret sessions over Knitweb fabric data."""
 
 from .adapters import (
+    ActivityStreamsAdapter,
     FabricWebAdapter,
     InteractionLogAdapter,
     JsonLdAdapter,
@@ -29,6 +30,7 @@ from .rlm import LLMAdapter, OfflineLLMAdapter, RLMHarness
 from .types import Chunk, ChunkRef, InterpretAnswer, InterpretSession, RankedChunk
 
 __all__ = [
+    "ActivityStreamsAdapter",
     "Chunk",
     "ChunkRef",
     "CONTEXT_FORMAT",

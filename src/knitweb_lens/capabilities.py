@@ -15,6 +15,7 @@ COMPATIBLE_READ_MODELS = (
     "vector-result-row",
     "local-text-json-markdown",
     "human-agent-interaction-log",
+    "activitystreams-object-or-collection",
 )
 
 OWNED_CAPABILITIES = (
@@ -51,6 +52,9 @@ NON_GOALS = DELEGATED_TO_KNITWEB + DELEGATED_TO_ORIGINTRAIL + (
     "token-or-payment-settlement",
     "identity-wallet-management",
     "signature-key-management",
+    "activitypub-inbox-outbox-delivery",
+    "activitypub-federated-server",
+    "social-graph-moderation",
 )
 
 
@@ -75,4 +79,3 @@ def compatibility_report() -> dict[str, Any]:
         "requires_knitweb_runtime": False,
         "requires_origintrail_runtime": False,
     }
-

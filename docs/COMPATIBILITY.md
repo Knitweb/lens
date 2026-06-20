@@ -45,10 +45,16 @@ not publish assets, anchor state, or present itself as a DKG implementation.
 - Vector result rows.
 - Local text, Markdown, and JSON files.
 - Human/agent interaction logs represented as read-only rows or JSON.
+- ActivityStreams objects and collections exported from social or agent systems.
 
 Interaction logs are compatibility inputs only. Lens may interpret them and cite
 their event ids, actors, timestamps, reply links, and target CIDs. Lens must not
 become the durable interaction store, agent orchestrator, or identity authority.
+
+ActivityStreams is a compatibility input only. Lens may normalize objects and
+collections into cited chunks. It must not implement ActivityPub inbox/outbox
+delivery, federation, follow side effects, moderation, or durable social graph
+storage.
 
 ## Guardrail
 

@@ -2,11 +2,70 @@
 
 from __future__ import annotations
 
+import re
+from html import unescape
 from pathlib import Path
 from typing import Any, Iterable, Protocol
 
 from .types import Chunk, ChunkRef
 from .util import chunk_text, read_json, record_to_text, record_title, stable_id
+
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+_ACTIVITYSTREAMS_TYPES = {
+    "Accept",
+    "Activity",
+    "Add",
+    "Announce",
+    "Application",
+    "Article",
+    "Audio",
+    "Block",
+    "Collection",
+    "CollectionPage",
+    "Create",
+    "Delete",
+    "Dislike",
+    "Document",
+    "Event",
+    "Flag",
+    "Follow",
+    "Group",
+    "Ignore",
+    "Image",
+    "IntransitiveActivity",
+    "Invite",
+    "Join",
+    "Leave",
+    "Like",
+    "Listen",
+    "Mention",
+    "Move",
+    "Note",
+    "Object",
+    "Offer",
+    "OrderedCollection",
+    "OrderedCollectionPage",
+    "Organization",
+    "Page",
+    "Person",
+    "Place",
+    "Profile",
+    "Question",
+    "Read",
+    "Reject",
+    "Relationship",
+    "Remove",
+    "Service",
+    "TentativeAccept",
+    "TentativeReject",
+    "Tombstone",
+    "Travel",
+    "Undo",
+    "Update",
+    "Video",
+    "View",
+}
 
 
 class SourceAdapter(Protocol):
@@ -36,6 +95,41 @@ def _edge_path(edges: Iterable[Any]) -> tuple[str, ...]:
 
 def _metadata(**values: str | int | None) -> tuple[tuple[str, str | int | None], ...]:
     return tuple(sorted(values.items()))
+
+
+def _iter_values(value: Any) -> Iterable[Any]:
+    if isinstance(value, (list, tuple)):
+        yield from value
+    elif value is not None:
+        yield value
+
+
+def _type_name(value: Any) -> str:
+    first = next(_iter_values(value), None)
+    return str(first).strip() if first is not None else ""
+
+
+def _plain_text(value: str) -> str:
+    without_tags = _HTML_TAG_RE.sub(" ", value)
+    return " ".join(unescape(without_tags).split())
+
+
+def _value_id(value: Any) -> str | None:
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    if isinstance(value, dict):
+        for key in ("id", "@id", "href", "url", "name"):
+            nested = value.get(key)
+            if isinstance(nested, str) and nested.strip():
+                return nested.strip()
+    return None
+
+
+def _append_relation(path: list[str], rel: str, value: Any) -> None:
+    for item in _iter_values(value):
+        identifier = _value_id(item)
+        if identifier:
+            path.append(f"{rel}->{identifier}")
 
 
 class JsonLdAdapter:
@@ -140,6 +234,156 @@ class FabricWebAdapter:
                 weight=1,
                 distance=0,
                 metadata=_metadata(adapter="fabric-web"),
+            )
+
+
+def _activitystreams_context(value: Any) -> bool:
+    for item in _iter_values(value):
+        if isinstance(item, str) and "activitystreams" in item.casefold():
+            return True
+        if isinstance(item, dict):
+            if any(isinstance(part, str) and "activitystreams" in part.casefold() for part in item.values()):
+                return True
+    return False
+
+
+def _looks_like_activitystreams(data: dict[str, Any]) -> bool:
+    if _activitystreams_context(data.get("@context")):
+        return True
+    activity_type = _type_name(data.get("type") or data.get("@type"))
+    if activity_type in {"Collection", "OrderedCollection", "CollectionPage", "OrderedCollectionPage"}:
+        return "items" in data or "orderedItems" in data
+    return activity_type in _ACTIVITYSTREAMS_TYPES and any(
+        key in data for key in ("actor", "object", "published", "inReplyTo", "target", "to", "cc")
+    )
+
+
+def _activitystreams_items(doc: dict[str, Any] | list[Any]) -> tuple[dict[str, Any], ...]:
+    if isinstance(doc, list):
+        raw_items = doc
+    elif isinstance(doc, dict):
+        raw_items = doc.get("orderedItems") or doc.get("items")
+        if raw_items is None:
+            raw_items = [doc]
+    else:
+        raise ValueError("ActivityStreams document must be an object or list")
+    if not isinstance(raw_items, list):
+        raise ValueError("ActivityStreams items must be a list")
+    items: list[dict[str, Any]] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            raise ValueError("ActivityStreams items must be objects")
+        items.append(item)
+    return tuple(items)
+
+
+def _activitystreams_text(item: dict[str, Any]) -> str:
+    containers: list[dict[str, Any]] = [item]
+    obj = item.get("object")
+    if isinstance(obj, dict):
+        containers.append(obj)
+    parts: list[str] = []
+    for container in containers:
+        for key in ("content", "summary", "name"):
+            value = container.get(key)
+            if isinstance(value, str) and value.strip():
+                text = _plain_text(value)
+                if text and text not in parts:
+                    parts.append(text)
+        source = container.get("source")
+        if isinstance(source, dict):
+            value = source.get("content")
+            if isinstance(value, str) and value.strip():
+                text = _plain_text(value)
+                if text and text not in parts:
+                    parts.append(text)
+    if parts:
+        return "\n\n".join(parts)
+    return record_to_text(item)
+
+
+def _activitystreams_relation_path(item: dict[str, Any]) -> tuple[str, ...]:
+    path: list[str] = []
+    containers: list[dict[str, Any]] = [item]
+    obj = item.get("object")
+    if isinstance(obj, dict):
+        containers.append(obj)
+    _append_relation(path, "actor", item.get("actor"))
+    _append_relation(path, "object", item.get("object"))
+    for rel, key in (
+        ("attributed-to", "attributedTo"),
+        ("targets", "target"),
+        ("context", "context"),
+        ("reply-to", "inReplyTo"),
+        ("audience-to", "to"),
+        ("audience-cc", "cc"),
+        ("tag", "tag"),
+    ):
+        for container in containers:
+            _append_relation(path, rel, container.get(key))
+    return tuple(dict.fromkeys(path))
+
+
+class ActivityStreamsAdapter:
+    """Adapter for read-only ActivityStreams objects and collections.
+
+    This reads ActivityStreams JSON as evidence. It does not implement
+    ActivityPub delivery, inbox/outbox side effects, federation, or moderation.
+    """
+
+    def __init__(
+        self,
+        doc: dict[str, Any] | list[Any],
+        *,
+        source_id: str = "activitystreams",
+        source_uri: str = "",
+        priority: int = 62,
+    ) -> None:
+        self._doc = doc
+        self._source_id = source_id
+        self._source_uri = source_uri
+        self._priority = priority
+
+    @property
+    def source_id(self) -> str:
+        return self._source_id
+
+    def iter_chunks(self) -> Iterable[Chunk]:
+        for index, item in enumerate(_activitystreams_items(self._doc)):
+            text = _activitystreams_text(item)
+            if not text.strip():
+                continue
+            obj = item.get("object")
+            activity_type = _type_name(item.get("type") or item.get("@type")) or "Activity"
+            object_type = _type_name(obj.get("type") or obj.get("@type")) if isinstance(obj, dict) else ""
+            node_id = _value_id(item) or stable_id("activitystreams-item", item)
+            actor = _value_id(item.get("actor"))
+            published = item.get("published") or item.get("updated")
+            title = item.get("name")
+            if not isinstance(title, str) or not title.strip():
+                title = " ".join(part for part in (activity_type, object_type) if part).strip() or node_id
+            ref = ChunkRef(
+                source_id=self._source_id,
+                source_uri=str(item.get("source_uri") or self._source_uri),
+                cid=str(item["cid"]) if item.get("cid") else None,
+                node_id=node_id,
+                relation_path=_activitystreams_relation_path(item),
+            )
+            yield Chunk(
+                ref=ref,
+                title=title,
+                text=text,
+                record=item,
+                priority=self._priority,
+                weight=int(item.get("weight", 1)),
+                distance=int(item.get("distance", 0)),
+                metadata=_metadata(
+                    index=index,
+                    adapter="activitystreams",
+                    activity_type=activity_type,
+                    actor=actor,
+                    published=str(published) if published is not None else None,
+                ),
             )
 
 
@@ -258,6 +502,15 @@ class LocalFilesAdapter:
                 data = read_json(path)
                 if isinstance(data, dict) and "@graph" in data:
                     adapter = JsonLdAdapter(
+                        data,
+                        source_id=f"{self._source_id}:{path.name}",
+                        source_uri=str(path),
+                        priority=self._priority,
+                    )
+                    yield from adapter.iter_chunks()
+                    continue
+                if isinstance(data, dict) and _looks_like_activitystreams(data):
+                    adapter = ActivityStreamsAdapter(
                         data,
                         source_id=f"{self._source_id}:{path.name}",
                         source_uri=str(path),

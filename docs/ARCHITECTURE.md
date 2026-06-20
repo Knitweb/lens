@@ -28,6 +28,12 @@ Those logs are treated as source rows with actors, timestamps, reply links, and
 target CIDs preserved in citations. Lens does not become a chat product, agent
 runtime, event bus, or identity system.
 
+Lens can also consume ActivityStreams objects and collections as exported social
+interaction evidence. It preserves actor, object, reply, target, tag, audience,
+and publication fields in chunk references and metadata. It does not implement
+ActivityPub inbox/outbox delivery, follow side effects, federation, moderation,
+or social graph storage.
+
 ## Context Bundles
 
 Lens context bundles are portable JSON snapshots of the interpret context. They

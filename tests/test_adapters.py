@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from knitweb_lens import (
+    ActivityStreamsAdapter,
     InteractionLogAdapter,
     JsonLdAdapter,
     LocalFilesAdapter,
@@ -172,3 +173,79 @@ def test_local_files_adapter_loads_interaction_json(tmp_path):
 def test_interaction_log_adapter_rejects_non_object_events():
     with pytest.raises(ValueError, match="interaction log events must be objects"):
         tuple(InteractionLogAdapter(["bad"]).iter_chunks())
+
+
+def test_activitystreams_adapter_preserves_social_graph_context():
+    doc = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Create",
+        "id": "https://social.example/activities/1",
+        "actor": "https://social.example/users/ada",
+        "published": "2026-06-20T12:30:00Z",
+        "to": ["https://www.w3.org/ns/activitystreams#Public"],
+        "object": {
+            "type": "Note",
+            "id": "https://social.example/notes/1",
+            "content": "<p>Lens should read ActivityStreams as evidence, not federate delivery.</p>",
+            "inReplyTo": "https://social.example/notes/root",
+            "tag": [{"type": "Mention", "href": "https://social.example/users/agent", "name": "@agent"}],
+        },
+    }
+
+    chunks = tuple(ActivityStreamsAdapter(doc, source_uri="activity.json").iter_chunks())
+
+    assert len(chunks) == 1
+    assert chunks[0].title == "Create Note"
+    assert chunks[0].text == "Lens should read ActivityStreams as evidence, not federate delivery."
+    assert chunks[0].ref.node_id == "https://social.example/activities/1"
+    assert chunks[0].ref.relation_path == (
+        "actor->https://social.example/users/ada",
+        "object->https://social.example/notes/1",
+        "reply-to->https://social.example/notes/root",
+        "audience-to->https://www.w3.org/ns/activitystreams#Public",
+        "tag->https://social.example/users/agent",
+    )
+    assert chunks[0].metadata == (
+        ("activity_type", "Create"),
+        ("actor", "https://social.example/users/ada"),
+        ("adapter", "activitystreams"),
+        ("index", 0),
+        ("published", "2026-06-20T12:30:00Z"),
+    )
+
+
+def test_local_files_adapter_loads_activitystreams_collection(tmp_path):
+    path = tmp_path / "outbox.json"
+    path.write_text(
+        json.dumps(
+            {
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "type": "OrderedCollection",
+                "orderedItems": [
+                    {
+                        "type": "Announce",
+                        "id": "https://social.example/activities/2",
+                        "actor": "https://social.example/users/agent",
+                        "object": {
+                            "type": "Note",
+                            "id": "https://social.example/notes/2",
+                            "summary": "Agent shared a cited Lens interpretation.",
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    chunks = tuple(LocalFilesAdapter([path]).iter_chunks())
+
+    assert len(chunks) == 1
+    assert chunks[0].ref.source_id == "local-files:outbox.json"
+    assert chunks[0].title == "Announce Note"
+    assert "cited Lens interpretation" in chunks[0].text
+
+
+def test_activitystreams_adapter_rejects_non_object_items():
+    with pytest.raises(ValueError, match="ActivityStreams items must be objects"):
+        tuple(ActivityStreamsAdapter({"orderedItems": ["bad"]}).iter_chunks())

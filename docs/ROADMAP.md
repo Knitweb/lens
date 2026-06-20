@@ -8,6 +8,10 @@ Pulse integration more real.
 It now also accepts exported human/agent interaction logs as read-only evidence,
 without becoming an interaction store or agent runtime.
 
+It accepts ActivityStreams exports as another read-only evidence source for
+online human/agent interaction graphs. ActivityPub server behavior remains out
+of scope.
+
 ## Current Priorities
 
 ### 1. Real Pulse Fixture
