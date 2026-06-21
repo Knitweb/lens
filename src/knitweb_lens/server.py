@@ -11,6 +11,38 @@ from .adapters import LocalFilesAdapter
 from .context import answer_from_context, context_bundle
 from .rlm import RLMHarness
 
+# Cap request bodies so a spoofed/huge Content-Length cannot drive an
+# unbounded read into memory (DoS).
+MAX_BODY_BYTES = 4 * 1024 * 1024  # 4 MiB
+
+
+def _confine_paths(
+    requested: Iterable[str | Path], roots: Iterable[str | Path]
+) -> tuple[Path, ...]:
+    """Restrict client-requested file paths to the configured roots.
+
+    Each requested path must resolve to a configured file, or to a file under
+    a configured directory root. Anything else raises ``PermissionError`` —
+    without this, a client could pass ``paths=["/etc/passwd"]`` and exfiltrate
+    arbitrary local files (path traversal). If no roots are configured, no
+    client-supplied paths are permitted.
+    """
+    requested = tuple(requested)
+    if not requested:
+        return ()
+    resolved_roots = [Path(root).resolve() for root in roots]
+    safe: list[Path] = []
+    for raw in requested:
+        candidate = Path(raw).resolve()
+        allowed = any(
+            candidate == root or (root.is_dir() and root in candidate.parents)
+            for root in resolved_roots
+        )
+        if not allowed:
+            raise PermissionError(f"path not permitted: {raw}")
+        safe.append(candidate)
+    return tuple(safe)
+
 
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: dict) -> None:
     raw = json.dumps(payload, sort_keys=True).encode("utf-8")
@@ -42,12 +74,23 @@ def make_handler(base_paths: Iterable[str | Path]) -> type[BaseHTTPRequestHandle
                 return
             try:
                 length = int(self.headers.get("content-length", "0"))
+            except (TypeError, ValueError):
+                _json_response(self, 400, {"error": "invalid content-length"})
+                return
+            if length < 0:
+                _json_response(self, 400, {"error": "invalid content-length"})
+                return
+            if length > MAX_BODY_BYTES:
+                _json_response(self, 413, {"error": "request body too large"})
+                return
+            try:
                 payload = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
                 if "context" in payload:
                     answer = answer_from_context(payload["context"])
                 else:
                     query = payload["query"]
-                    paths = tuple(configured_paths) + tuple(payload.get("paths", ()))
+                    requested = _confine_paths(payload.get("paths", ()), configured_paths)
+                    paths = tuple(configured_paths) + requested
                     adapters = [LocalFilesAdapter(paths)] if paths else []
                     answer = RLMHarness().query(
                         query,
@@ -59,6 +102,8 @@ def make_handler(base_paths: Iterable[str | Path]) -> type[BaseHTTPRequestHandle
                 if payload.get("include_context"):
                     response["context"] = context_bundle(answer.session)
                 _json_response(self, 200, response)
+            except PermissionError as exc:
+                _json_response(self, 403, {"error": str(exc)})
             except Exception as exc:
                 _json_response(self, 400, {"error": str(exc)})
 
