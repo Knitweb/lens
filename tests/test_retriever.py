@@ -58,3 +58,47 @@ def test_retriever_rejects_invalid_source_trust():
         assert "between 0 and 100" in str(exc)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_rank_matches_per_chunk_score_after_query_hoist():
+    # Regression: query tokenization/phrase are hoisted out of the per-chunk
+    # hot path. The hoisted rank() path must produce results identical to
+    # calling the public score() per chunk (which recomputes them).
+    chunks = [
+        Chunk(ChunkRef("s", cid="a"), title="Pulse fabric", text="Lens preserves Pulse citations.", priority=10),
+        Chunk(ChunkRef("s", cid="b"), title="Other", text="unrelated alpha", priority=10),
+        Chunk(ChunkRef("s", cid="c"), title="Pulse", text="Pulse Pulse Pulse", priority=5),
+    ]
+    retriever = Retriever()
+    query = "Pulse citations"
+
+    via_rank = retriever.rank(query, chunks)
+    via_score = [retriever.score(query, chunk) for chunk in chunks]
+    by_cid = {item.chunk.ref.cid: item for item in via_rank}
+
+    for scored in via_score:
+        hoisted = by_cid[scored.chunk.ref.cid]
+        assert hoisted.score == scored.score
+        assert hoisted.lexical_score == scored.lexical_score
+
+
+def test_query_features_single_char_fallback_tokenizes_once():
+    # Regression for the hoist: a query whose tokens are ALL single-character must fall back to the
+    # raw token list (not empty) — and _query_features must tokenize the query only once.
+    from knitweb_lens.retriever import Retriever
+    import knitweb_lens.retriever as rmod
+
+    calls = {"n": 0}
+    real = rmod.tokenize
+
+    def counting_tokenize(s):
+        calls["n"] += 1
+        return real(s)
+
+    rmod.tokenize = counting_tokenize
+    try:
+        q_terms, phrase = Retriever()._query_features("a b c")  # all single-char tokens
+    finally:
+        rmod.tokenize = real
+    assert q_terms == ("a", "b", "c"), "single-char-only query must fall back to the raw tokens"
+    assert calls["n"] == 1, "query should be tokenized exactly once"
