@@ -28,9 +28,8 @@ class Retriever:
     def _query_features(self, query: str) -> tuple[tuple[str, ...], str]:
         """Query-only derivations used by every chunk score. Hoisted out of the
         per-chunk hot path so ``rank`` computes them once, not once per chunk."""
-        q_terms = tuple(term for term in tokenize(query) if len(term) > 1)
-        if not q_terms:
-            q_terms = tokenize(query)
+        all_terms = tokenize(query)                      # tokenize once
+        q_terms = tuple(t for t in all_terms if len(t) > 1) or tuple(all_terms)
         phrase = query.casefold().strip()
         return q_terms, phrase
 

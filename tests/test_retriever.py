@@ -80,3 +80,25 @@ def test_rank_matches_per_chunk_score_after_query_hoist():
         hoisted = by_cid[scored.chunk.ref.cid]
         assert hoisted.score == scored.score
         assert hoisted.lexical_score == scored.lexical_score
+
+
+def test_query_features_single_char_fallback_tokenizes_once():
+    # Regression for the hoist: a query whose tokens are ALL single-character must fall back to the
+    # raw token list (not empty) — and _query_features must tokenize the query only once.
+    from knitweb_lens.retriever import Retriever
+    import knitweb_lens.retriever as rmod
+
+    calls = {"n": 0}
+    real = rmod.tokenize
+
+    def counting_tokenize(s):
+        calls["n"] += 1
+        return real(s)
+
+    rmod.tokenize = counting_tokenize
+    try:
+        q_terms, phrase = Retriever()._query_features("a b c")  # all single-char tokens
+    finally:
+        rmod.tokenize = real
+    assert q_terms == ("a", "b", "c"), "single-char-only query must fall back to the raw tokens"
+    assert calls["n"] == 1, "query should be tokenized exactly once"
