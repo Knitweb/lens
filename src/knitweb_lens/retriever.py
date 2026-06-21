@@ -25,10 +25,20 @@ class Retriever:
         self.phrase_bonus = phrase_bonus
         self.source_trust = dict(source_trust or {})
 
-    def score(self, query: str, chunk: Chunk) -> RankedChunk:
+    def _query_features(self, query: str) -> tuple[tuple[str, ...], str]:
+        """Query-only derivations used by every chunk score. Hoisted out of the
+        per-chunk hot path so ``rank`` computes them once, not once per chunk."""
         q_terms = tuple(term for term in tokenize(query) if len(term) > 1)
         if not q_terms:
             q_terms = tokenize(query)
+        phrase = query.casefold().strip()
+        return q_terms, phrase
+
+    def score(self, query: str, chunk: Chunk) -> RankedChunk:
+        return self._score(self._query_features(query), chunk)
+
+    def _score(self, query_features: tuple[tuple[str, ...], str], chunk: Chunk) -> RankedChunk:
+        q_terms, phrase = query_features
         text = f"{chunk.title}\n{chunk.text}"
         doc_terms = Counter(tokenize(text))
         title_terms = unique_tokens(chunk.title)
@@ -38,7 +48,7 @@ class Retriever:
             lexical += doc_terms.get(term, 0) * 10
             if term in title_terms:
                 lexical += 20
-        if query.casefold().strip() and query.casefold().strip() in text.casefold():
+        if phrase and phrase in text.casefold():
             lexical += self.phrase_bonus
 
         priority_score = chunk.priority * 100
@@ -58,7 +68,8 @@ class Retriever:
         )
 
     def rank(self, query: str, chunks: Iterable[Chunk]) -> tuple[RankedChunk, ...]:
-        ranked = [self.score(query, chunk) for chunk in chunks]
+        features = self._query_features(query)
+        ranked = [self._score(features, chunk) for chunk in chunks]
         ranked.sort(
             key=lambda item: (
                 -item.score,

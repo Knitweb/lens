@@ -58,3 +58,25 @@ def test_retriever_rejects_invalid_source_trust():
         assert "between 0 and 100" in str(exc)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_rank_matches_per_chunk_score_after_query_hoist():
+    # Regression: query tokenization/phrase are hoisted out of the per-chunk
+    # hot path. The hoisted rank() path must produce results identical to
+    # calling the public score() per chunk (which recomputes them).
+    chunks = [
+        Chunk(ChunkRef("s", cid="a"), title="Pulse fabric", text="Lens preserves Pulse citations.", priority=10),
+        Chunk(ChunkRef("s", cid="b"), title="Other", text="unrelated alpha", priority=10),
+        Chunk(ChunkRef("s", cid="c"), title="Pulse", text="Pulse Pulse Pulse", priority=5),
+    ]
+    retriever = Retriever()
+    query = "Pulse citations"
+
+    via_rank = retriever.rank(query, chunks)
+    via_score = [retriever.score(query, chunk) for chunk in chunks]
+    by_cid = {item.chunk.ref.cid: item for item in via_rank}
+
+    for scored in via_score:
+        hoisted = by_cid[scored.chunk.ref.cid]
+        assert hoisted.score == scored.score
+        assert hoisted.lexical_score == scored.lexical_score
