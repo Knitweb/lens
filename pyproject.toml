@@ -33,8 +33,8 @@ lens = "knitweb_lens.cli:main"
 knitweb-lens = "knitweb_lens.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "build>=1"]
-pdf = ["reportlab>=4", "pdfplumber>=0.11", "pypdf>=4"]
+dev = ["pytest>=9.0.3", "build>=1"]
+pdf = ["reportlab>=4", "pdfplumber>=0.11", "pypdf>=6.13.3"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
