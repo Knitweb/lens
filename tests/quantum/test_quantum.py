@@ -85,3 +85,45 @@ def test_store_find(tmp_path):
     store.put(circ)
     hits = store.find(query="findme")
     assert len(hits) == 1
+
+
+# ── regression: library QASM generation bugs ────────────────────────────
+def test_every_circuit_has_matching_qreg_size():
+    """Every generated circuit must declare qreg q[n] matching its meta.qubits.
+
+    Regression for the steane_7 typo `h[4];` (invalid, missing q[...]) and the
+    dead duplicate steane_7 branch — guards all 100 circuits at once.
+    """
+    lib = library()
+    for name, circ in lib.items():
+        qasm = circ.qasm
+        assert f"qreg q[{circ.meta.qubits}];" in qasm, f"{name}: qreg size mismatch"
+        for line in qasm.splitlines():
+            s = line.strip()
+            if not s or s.startswith(("//", "OPENQASM", "include", "qreg", "creg", "measure", "if")):
+                continue
+            assert "q[" in s, f"{name}: malformed gate line {s!r}"
+
+
+def test_no_out_of_range_qubit_index():
+    """No gate may address a qubit index >= declared register size.
+
+    Skips the `qreg q[N];` declaration line, where N is the size (not an index).
+    """
+    import re
+    lib = library()
+    for name, circ in lib.items():
+        n = circ.meta.qubits
+        for line in circ.qasm.splitlines():
+            s = line.strip()
+            if s.startswith(("qreg", "creg")):
+                continue
+            for idx in re.findall(r"q\[(\d+)\]", s):
+                assert int(idx) < n, f"{name}: q[{idx}] out of range (size {n})"
+
+
+def test_superdense_coding_is_valid():
+    """superdense_coding must apply a Pauli in the encode step (was H;CX;CX;H no-op)."""
+    lib = library()
+    body = lib["superdense_coding"].qasm
+    assert "x q[0];" in body
