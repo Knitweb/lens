@@ -430,8 +430,6 @@ def _body(name: str, q: int) -> list[str]:  # noqa: C901 (big switch)
                 "cx q[0],q[3];","cx q[0],q[5];","cx q[0],q[6];",
                 "cx q[2],q[3];","cx q[2],q[4];","cx q[2],q[6];",
                 "cx q[4],q[5];","cx q[4],q[6];"]
-    if name == "steane_7":
-        return [f"cx q[{i}],q[{(i+1)%7}];" for i in range(7)]
     if name == "perfect_5":
         return ["h q[0];",
                 "cz q[0],q[1];","cz q[0],q[2];","cz q[0],q[3];","cz q[0],q[4];",
@@ -442,7 +440,8 @@ def _body(name: str, q: int) -> list[str]:  # noqa: C901 (big switch)
                 "measure q[0] -> c[0];","measure q[1] -> c[1];",
                 "if(c==1) x q[2];","if(c==2) z q[2];"]
     if name == "superdense_coding":
-        return ["h q[0];","cx q[0],q[1];","cx q[0],q[1];","h q[0];"]
+        # encode classical bits "10": X then H → sends |Φ-⟩
+        return ["h q[0];","cx q[0],q[1];","x q[0];","h q[0];"]
     if name == "syndrome_meas_3":
         return ["cx q[0],q[3];","cx q[1],q[3];",
                 "cx q[1],q[4];","cx q[2],q[4];"]
@@ -544,7 +543,7 @@ def _body(name: str, q: int) -> list[str]:  # noqa: C901 (big switch)
         return ["h q[0];","cx q[0],q[1];",
                 "h q[2];","cx q[2],q[3];",
                 "cx q[1],q[2];","h q[1];"]
-    if name in ("dense_code_2","superdense_coding"):
+    if name == "dense_code_2":
         return ["h q[0];","cx q[0],q[1];","x q[0];","h q[0];"]
     if name == "qcomm_channel_3":
         return ["h q[0];","cx q[0],q[1];","ry(0.1) q[1];","cx q[1],q[2];"]
