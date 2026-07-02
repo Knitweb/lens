@@ -5,25 +5,47 @@ from ..circuit import QuantumCircuit, CircuitMeta, _count_qubits, _estimate_dept
 
 def from_qasm(qasm: str, *, name: str = "unnamed", domain: str = "fundamental",
               tags: list[str] | None = None, description: str = "",
-              author: str = "") -> QuantumCircuit:
-    """Parse QASM 2.0 or 3.0 string into a QuantumCircuit."""
+              author: str = "", lang: str = "") -> QuantumCircuit:
+    """Parse a circuit source string into a QuantumCircuit.
+
+    Auto-detects OpenQASM 2.0 vs 3.0. Pass ``lang="qasm3"`` to keep a QASM 3
+    body verbatim (pass-through, no down-conversion), or ``lang="stim"`` /
+    ``lang="qir"`` to record a non-QASM interchange format — in those cases the
+    body is stored as-is and the format is recorded in ``source_lang`` and tags.
+    """
     qasm = qasm.strip()
     if not qasm:
         raise ValueError("Empty QASM string")
 
-    # Detect version
-    source_lang = "qasm3" if "OPENQASM 3" in qasm else "qasm2"
+    tags = list(tags or [])
 
-    # Normalise to QASM 2.0 if 3.0 (best-effort)
-    if source_lang == "qasm3":
-        qasm = _qasm3_to_qasm2(qasm)
+    # Explicit non-QASM interchange formats: store verbatim, tag the format.
+    if lang in ("stim", "qir"):
+        if lang not in tags:
+            tags.append(lang)
+        meta = CircuitMeta(
+            name=name, qubits=_count_qubits(qasm), depth=_estimate_depth(qasm),
+            tags=tags, domain=domain, source_lang=lang,
+            description=description, author=author,
+        )
+        return QuantumCircuit(meta=meta, qasm=qasm)
+
+    # Detect / honor QASM version.
+    if lang == "qasm3" or "OPENQASM 3" in qasm:
+        source_lang = "qasm3"
+        # Pass-through: keep QASM 3 verbatim unless explicitly down-converted.
+        if lang == "":
+            qasm = _qasm3_to_qasm2(qasm)
+            source_lang = "qasm2"
+    else:
+        source_lang = "qasm2"
 
     n = _count_qubits(qasm)
     d = _estimate_depth(qasm)
 
     meta = CircuitMeta(
         name=name, qubits=n, depth=d,
-        tags=tags or [], domain=domain,
+        tags=tags, domain=domain,
         source_lang=source_lang,
         description=description, author=author,
     )

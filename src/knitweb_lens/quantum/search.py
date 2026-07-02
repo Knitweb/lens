@@ -4,19 +4,20 @@ from .library import library
 
 
 def search(query: str = "", domain: str = "", tags: list[str] | None = None,
-           source: str = "library") -> list[dict]:
-    """Search circuits.
+           source: str = "library", kind: str = "") -> list[dict]:
+    """Search artifacts (circuits, results, backends).
 
     Parameters
     ----------
     query   : substring match against name / description / tags
-    domain  : filter by domain (fundamental, algorithms, arithmetic, ...)
+    domain  : filter by domain (fundamental, algorithms, ..., or "result"/"backend")
     tags    : filter by tag list (any match)
-    source  : "library" (built-in) | "store" (local) | "all"
+    source  : "library" (built-in circuits) | "store" (local artifacts) | "all"
+    kind    : "" (any) | "circuit" | "result" | "backend"
     """
     results: list[dict] = []
 
-    if source in ("library", "all"):
+    if source in ("library", "all") and kind in ("", "circuit"):
         for circuit in library().values():
             if _matches(circuit, query, domain, tags):
                 results.append(circuit.to_dict())
@@ -24,7 +25,7 @@ def search(query: str = "", domain: str = "", tags: list[str] | None = None,
     if source in ("store", "all"):
         from .store import Store
         store = Store()
-        for item in store.list():
+        for item in store.list(kind=kind):
             meta = item.get("meta", {})
             if _matches_meta(meta, query, domain, tags):
                 results.append(item)
