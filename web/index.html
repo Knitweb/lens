@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>knitweb-lens — Quantum Circuit Library</title>
+<style>
+  :root {
+    --bg: #0e1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #7d8590; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --purple: #bc8cff;
+    --red: #f85149; --orange: #f0883e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'SF Mono',monospace;font-size:13px;line-height:1.6}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .hero{padding:48px 24px 32px;max-width:860px;margin:0 auto}
+  .hero h1{font-size:28px;font-weight:700;letter-spacing:-0.5px}
+  .hero h1 span{color:var(--accent)}
+  .hero p{margin-top:10px;color:var(--muted);max-width:540px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .badge{font-size:11px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);color:var(--muted)}
+  .badge.accent{border-color:var(--accent)44;color:var(--accent)}
+  .badge.green{border-color:var(--green)44;color:var(--green)}
+
+  .install-box{max-width:860px;margin:0 auto 32px;padding:0 24px}
+  .install-box pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:14px 18px;overflow-x:auto;color:var(--green);font-size:13px}
+
+  .controls{max-width:860px;margin:0 auto;padding:0 24px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .search-input{flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);
+    border-radius:6px;color:var(--text);padding:6px 12px;font:inherit;outline:none}
+  .search-input:focus{border-color:var(--accent)}
+  .chip{padding:4px 12px;border-radius:12px;border:1px solid var(--border);background:transparent;
+    color:var(--muted);cursor:pointer;font:inherit;font-size:11px;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip.active{border-color:var(--accent);color:var(--accent);background:var(--accent)11}
+
+  .grid{max-width:860px;margin:0 auto;padding:0 24px 64px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:14px;cursor:default;transition:.15s;position:relative}
+  .card:hover{border-color:var(--accent)66;transform:translateY(-1px)}
+  .card-name{font-weight:700;font-size:12px;color:var(--text);letter-spacing:.3px}
+  .card-domain{font-size:10px;color:var(--muted);margin-top:2px}
+  .card-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .tag{font-size:9px;padding:1px 6px;border-radius:3px;border:1px solid var(--border);color:var(--muted)}
+  .qubits{font-size:9px;padding:1px 6px;border-radius:3px;background:var(--accent)15;
+    border:1px solid var(--accent)33;color:var(--accent)}
+  .modal-overlay{display:none;position:fixed;inset:0;background:#000a;z-index:100;
+    align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    width:min(720px,96vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+  .modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;
+    justify-content:space-between;align-items:flex-start}
+  .modal-head h2{font-size:15px}
+  .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+  .modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+  .modal-qasm{background:var(--bg);border:1px solid var(--border);border-radius:6px;
+    padding:14px;font-size:11px;color:var(--green);overflow-x:auto;white-space:pre;line-height:1.6}
+  .modal-cid{font-size:10px;color:var(--muted);margin-top:12px;word-break:break-all}
+  .copy-btn{padding:4px 10px;background:var(--accent)22;border:1px solid var(--accent)44;
+    border-radius:4px;color:var(--accent);cursor:pointer;font:inherit;font-size:11px}
+  .copy-btn:hover{background:var(--accent)33}
+  .count{color:var(--muted);font-size:11px;margin:0 auto;padding:0 24px 8px;max-width:860px}
+
+  .colab-strip{max-width:860px;margin:0 auto;padding:0 24px 32px;
+    display:flex;gap:10px;flex-wrap:wrap}
+  .colab-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:12px 16px;flex:1;min-width:180px}
+  .colab-card h3{font-size:12px;color:var(--text)}
+  .colab-card p{font-size:11px;color:var(--muted);margin-top:4px}
+  .colab-card a{display:inline-block;margin-top:8px;font-size:11px;color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>knitweb-<span>lens</span></h1>
+  <p>100 quantum circuits. Zero dependencies. Content-addressed P2P sharing via the Knitweb fabric.</p>
+  <div class="badges">
+    <span class="badge accent">v0.1.0</span>
+    <span class="badge green">100 circuits</span>
+    <span class="badge">MIT</span>
+    <span class="badge">QASM 2.0</span>
+    <span class="badge">Qiskit · Cirq · PennyLane · pytket</span>
+  </div>
+</div>
+
+<div class="install-box">
+  <pre>pip install knitweb-lens
+# With Qiskit adapter:  pip install knitweb-lens[qiskit]
+# All adapters:         pip install knitweb-lens[all]</pre>
+</div>
+
+<div class="colab-strip">
+  <div class="colab-card">
+    <h3>01 Quickstart</h3>
+    <p>Install, browse, store your first circuit</p>
+    <a href="https://colab.research.google.com/github/Knitweb/lens/blob/main/notebooks/01_quickstart.ipynb" target="_blank" rel="noopener">Open in Colab ↗</a>
+  </div>
+  <div class="colab-card">
+    <h3>02 Circuit Library</h3>
+    <p>All 100 circuits + Qiskit Aer simulation</p>
+    <a href="https://colab.research.google.com/github/Knitweb/lens/blob/main/notebooks/02_circuit_library.ipynb" target="_blank" rel="noopener">Open in Colab ↗</a>
+  </div>
+  <div class="colab-card">
+    <h3>03 P2P Sharing</h3>
+    <p>Push/pull circuits via Knitweb relay by CID</p>
+    <a href="https://colab.research.google.com/github/Knitweb/lens/blob/main/notebooks/03_p2p_sharing.ipynb" target="_blank" rel="noopener">Open in Colab ↗</a>
+  </div>
+  <div class="colab-card">
+    <h3>04 Qiskit & PennyLane</h3>
+    <p>Convert framework circuits to lens format</p>
+    <a href="https://colab.research.google.com/github/Knitweb/lens/blob/main/notebooks/04_from_qiskit_pennylane.ipynb" target="_blank" rel="noopener">Open in Colab ↗</a>
+  </div>
+</div>
+
+<div class="controls">
+  <input class="search-input" id="search" placeholder="Search circuits…" oninput="render()">
+  <button class="chip active" data-domain="" onclick="setDomain('',this)">All</button>
+  <button class="chip" data-domain="fundamental"     onclick="setDomain('fundamental',this)">fundamental</button>
+  <button class="chip" data-domain="algorithms"      onclick="setDomain('algorithms',this)">algorithms</button>
+  <button class="chip" data-domain="arithmetic"      onclick="setDomain('arithmetic',this)">arithmetic</button>
+  <button class="chip" data-domain="error_correction" onclick="setDomain('error_correction',this)">error correction</button>
+  <button class="chip" data-domain="cryptography"    onclick="setDomain('cryptography',this)">cryptography</button>
+  <button class="chip" data-domain="optimization"    onclick="setDomain('optimization',this)">optimization</button>
+  <button class="chip" data-domain="simulation"      onclick="setDomain('simulation',this)">simulation</button>
+  <button class="chip" data-domain="communication"   onclick="setDomain('communication',this)">communication</button>
+</div>
+
+<div class="count" id="count">100 circuits</div>
+<div class="grid" id="grid"></div>
+
+<div class="modal-overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="m-name">—</h2>
+        <div id="m-domain" style="font-size:10px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="m-desc" style="color:var(--muted);font-size:12px;margin-bottom:12px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:var(--muted)">QASM 2.0</span>
+        <button class="copy-btn" onclick="copyQasm()">Copy</button>
+      </div>
+      <pre class="modal-qasm" id="m-qasm"></pre>
+      <div class="modal-cid" id="m-cid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CIRCUITS = [
+  // fundamental (20)
+  {name:'h_single',q:1,domain:'fundamental',tags:['hadamard','superposition'],desc:'Single-qubit Hadamard: creates equal superposition'},
+  {name:'cnot',q:2,domain:'fundamental',tags:['entanglement','two-qubit'],desc:'Controlled-NOT: fundamental two-qubit entangler'},
+  {name:'toffoli',q:3,domain:'fundamental',tags:['ccx','universal'],desc:'Toffoli (CCX): universal classical reversible gate'},
+  {name:'swap',q:2,domain:'fundamental',tags:['swap'],desc:'SWAP: exchanges two qubit states'},
+  {name:'cswap',q:3,domain:'fundamental',tags:['fredkin','swap'],desc:'Fredkin (CSWAP): controlled swap'},
+  {name:'bell_phi_plus',q:2,domain:'fundamental',tags:['bell','entanglement'],desc:'Bell state |Φ+⟩ = (|00⟩+|11⟩)/√2'},
+  {name:'bell_phi_minus',q:2,domain:'fundamental',tags:['bell','entanglement'],desc:'Bell state |Φ-⟩ = (|00⟩-|11⟩)/√2'},
+  {name:'bell_psi_plus',q:2,domain:'fundamental',tags:['bell','entanglement'],desc:'Bell state |Ψ+⟩ = (|01⟩+|10⟩)/√2'},
+  {name:'bell_psi_minus',q:2,domain:'fundamental',tags:['bell','entanglement'],desc:'Bell state |Ψ-⟩ = (|01⟩-|10⟩)/√2'},
+  {name:'ghz_3',q:3,domain:'fundamental',tags:['ghz','entanglement'],desc:'3-qubit GHZ: maximally entangled'},
+  {name:'ghz_4',q:4,domain:'fundamental',tags:['ghz','entanglement'],desc:'4-qubit GHZ state'},
+  {name:'ghz_5',q:5,domain:'fundamental',tags:['ghz','entanglement'],desc:'5-qubit GHZ state'},
+  {name:'w_state_3',q:3,domain:'fundamental',tags:['w-state','entanglement'],desc:'3-qubit W state: (|001⟩+|010⟩+|100⟩)/√3'},
+  {name:'qft_4',q:4,domain:'fundamental',tags:['qft','fourier'],desc:'4-qubit Quantum Fourier Transform'},
+  {name:'phase_kickback',q:2,domain:'fundamental',tags:['phase','kickback'],desc:'Phase kickback: eigenphase embedded in control'},
+  {name:'quantum_walk_2',q:2,domain:'fundamental',tags:['walk'],desc:'2-qubit discrete quantum walk step'},
+  {name:'superposition_n4',q:4,domain:'fundamental',tags:['superposition'],desc:'4-qubit uniform superposition via H⊗4'},
+  {name:'entangled_pair',q:2,domain:'fundamental',tags:['epr'],desc:'EPR pair: basis of quantum communication'},
+  {name:'rx_ry_rz',q:1,domain:'fundamental',tags:['rotation'],desc:'Single-qubit Rx Ry Rz sequence'},
+  {name:'phase_oracle',q:3,domain:'fundamental',tags:['oracle','phase'],desc:'3-qubit phase oracle: marks |111⟩ with phase flip'},
+  // algorithms (20)
+  {name:'deutsch_jozsa',q:4,domain:'algorithms',tags:['dj','oracle'],desc:'Deutsch-Jozsa: O(1) constant vs balanced'},
+  {name:'bernstein_vazirani',q:4,domain:'algorithms',tags:['bv','oracle'],desc:'Bernstein-Vazirani: extract hidden bit-string in one query'},
+  {name:'simon_2',q:4,domain:'algorithms',tags:['simon','oracle'],desc:"Simon's algorithm: find hidden period O(n) queries"},
+  {name:'grover_2q',q:2,domain:'algorithms',tags:['grover','search'],desc:'2-qubit Grover: quadratic search speedup'},
+  {name:'grover_3q',q:3,domain:'algorithms',tags:['grover','search'],desc:'3-qubit Grover: search 8-element database'},
+  {name:'qpe_2',q:4,domain:'algorithms',tags:['qpe','phase'],desc:'QPE with 2 precision bits'},
+  {name:'qpe_3',q:5,domain:'algorithms',tags:['qpe','phase'],desc:'QPE with 3 precision bits'},
+  {name:'hhl_2x2',q:4,domain:'algorithms',tags:['hhl','linear-systems'],desc:'HHL for 2×2 linear system Ax=b'},
+  {name:'amplitude_amp',q:3,domain:'algorithms',tags:['amplitude','amplification'],desc:'Amplitude Amplification: generalised Grover'},
+  {name:'quantum_walk_4',q:4,domain:'algorithms',tags:['walk'],desc:'4-qubit quantum walk: line graph step'},
+  {name:'swap_test',q:5,domain:'algorithms',tags:['swap-test','fidelity'],desc:'SWAP test: estimates overlap ⟨ψ|φ⟩'},
+  {name:'vqe_h2',q:4,domain:'algorithms',tags:['vqe','variational'],desc:'VQE ansatz for H₂ ground state'},
+  {name:'qaoa_maxcut_4',q:4,domain:'algorithms',tags:['qaoa','optimization'],desc:'QAOA MaxCut on 4-node graph p=1'},
+  {name:'qaoa_maxcut_p2',q:4,domain:'algorithms',tags:['qaoa','optimization'],desc:'QAOA MaxCut p=2 layers'},
+  {name:'shor_order_15',q:8,domain:'algorithms',tags:['shor','factoring'],desc:"Shor's period-finding oracle for N=15"},
+  {name:'variational_4',q:4,domain:'algorithms',tags:['variational','ansatz'],desc:'4-qubit hardware-efficient variational ansatz'},
+  {name:'iqpe',q:2,domain:'algorithms',tags:['iqpe','phase'],desc:'Iterative QPE: resource-efficient phase estimation'},
+  {name:'haa_4',q:4,domain:'algorithms',tags:['ansatz','hardware'],desc:'Hardware-efficient ansatz depth-2'},
+  {name:'real_amplitudes',q:4,domain:'algorithms',tags:['ansatz','real'],desc:'RealAmplitudes: only real amplitudes'},
+  {name:'two_local_rzrx',q:4,domain:'algorithms',tags:['two-local','ansatz'],desc:'TwoLocal ansatz: Rz–Rx + CNOT entanglement'},
+  // arithmetic (15)
+  {name:'adder_1bit',q:3,domain:'arithmetic',tags:['adder'],desc:'1-bit quantum full adder: sum and carry'},
+  {name:'adder_4bit',q:9,domain:'arithmetic',tags:['adder','ripple-carry'],desc:'4-bit ripple-carry quantum adder'},
+  {name:'draper_adder_4',q:8,domain:'arithmetic',tags:['draper','qft-adder'],desc:'Draper QFT-based addition: no carry qubits'},
+  {name:'subtractor_4',q:9,domain:'arithmetic',tags:['subtractor'],desc:'4-bit quantum subtractor'},
+  {name:'multiplier_2bit',q:8,domain:'arithmetic',tags:['multiplier'],desc:'2-bit quantum multiplier: a×b in 4-bit register'},
+  {name:'modular_add_4',q:8,domain:'arithmetic',tags:['modular','adder'],desc:'4-bit modular adder (mod N)'},
+  {name:'increment_4',q:4,domain:'arithmetic',tags:['increment'],desc:'4-bit in-place quantum increment'},
+  {name:'comparator_4',q:9,domain:'arithmetic',tags:['comparator'],desc:'4-bit quantum comparator: sets ancilla if a < b'},
+  {name:'gcd_4',q:12,domain:'arithmetic',tags:['gcd','euclidean'],desc:'Quantum GCD for 4-bit inputs'},
+  {name:'controlled_add_4',q:9,domain:'arithmetic',tags:['controlled','adder'],desc:'Controlled 4-bit adder'},
+  {name:'modular_exp_15',q:8,domain:'arithmetic',tags:['modular-exp','shor'],desc:"Modular exponentiation 2^x mod 15: core of Shor's"},
+  {name:'cuccaro_adder',q:10,domain:'arithmetic',tags:['cuccaro','adder'],desc:'Cuccaro in-place adder: linear depth, one ancilla'},
+  {name:'carry_save_4',q:12,domain:'arithmetic',tags:['carry-save'],desc:'Carry-save adder for 3×4-bit operands'},
+  {name:'square_4',q:8,domain:'arithmetic',tags:['squaring'],desc:'4-bit quantum squaring |x⟩|0⟩ → |x⟩|x²⟩'},
+  {name:'div_by_3',q:6,domain:'arithmetic',tags:['division'],desc:'Quantum integer division by 3'},
+  // error_correction (10)
+  {name:'bit_flip_3',q:3,domain:'error_correction',tags:['bit-flip','repetition'],desc:'3-qubit bit-flip code'},
+  {name:'phase_flip_3',q:3,domain:'error_correction',tags:['phase-flip','repetition'],desc:'3-qubit phase-flip (sign) code'},
+  {name:'shor_9',q:9,domain:'error_correction',tags:['shor-9','qec'],desc:'Shor 9-qubit code: first general QEC'},
+  {name:'steane_7',q:7,domain:'error_correction',tags:['steane','css'],desc:'Steane [[7,1,3]] code: first CSS code'},
+  {name:'perfect_5',q:5,domain:'error_correction',tags:['perfect','qec'],desc:'[[5,1,3]] perfect code: minimal universal QEC'},
+  {name:'teleportation',q:3,domain:'error_correction',tags:['teleportation'],desc:'Quantum teleportation: transmit state via entanglement'},
+  {name:'superdense_coding',q:2,domain:'error_correction',tags:['superdense'],desc:'Superdense coding: 2 classical bits via 1 qubit'},
+  {name:'syndrome_meas_3',q:5,domain:'error_correction',tags:['syndrome'],desc:'3-qubit repetition code syndrome measurement'},
+  {name:'logical_x',q:7,domain:'error_correction',tags:['logical-gate','qec'],desc:'Logical X on Steane [[7,1,3]] encoded qubit'},
+  {name:'logical_hadamard',q:7,domain:'error_correction',tags:['logical-gate','qec'],desc:'Logical Hadamard on Steane [[7,1,3]]'},
+  // cryptography (10)
+  {name:'bb84_encode',q:2,domain:'cryptography',tags:['bb84','qkd'],desc:'BB84 qubit encoding: 4 BB84 basis states'},
+  {name:'e91_entangle',q:2,domain:'cryptography',tags:['e91','qkd'],desc:'E91 entanglement-based QKD: Ekert protocol'},
+  {name:'b92_encode',q:2,domain:'cryptography',tags:['b92','qkd'],desc:'B92 two-state QKD encoding'},
+  {name:'commit_scheme',q:3,domain:'cryptography',tags:['commitment','crypto'],desc:'Quantum bit commitment scheme'},
+  {name:'hash_oracle_3',q:6,domain:'cryptography',tags:['hash','oracle'],desc:'3-bit quantum hash oracle'},
+  {name:'grover_2of8',q:3,domain:'cryptography',tags:['grover','crypto'],desc:'Grover search: 2 marked items in 8-element database'},
+  {name:'ecdlp_oracle_4',q:8,domain:'cryptography',tags:['ecdlp','ecc'],desc:'4-bit ECDLP oracle: period-finding for ECC DLP'},
+  {name:'secp256k1_pointadd',q:4,domain:'cryptography',tags:['secp256k1','bitcoin'],desc:'Minimal secp256k1 point-add circuit (4-bit demo)'},
+  {name:'secret_sharing_3',q:3,domain:'cryptography',tags:['secret-sharing'],desc:'3-player quantum secret sharing via GHZ'},
+  {name:'qrng_4',q:4,domain:'cryptography',tags:['rng','random'],desc:'QRNG: 4 independent random bits'},
+  // optimization (10)
+  {name:'qaoa_tsp_4',q:4,domain:'optimization',tags:['qaoa','tsp'],desc:'QAOA for 4-city TSP'},
+  {name:'vqe_lih',q:4,domain:'optimization',tags:['vqe','chemistry'],desc:'VQE UCCSD ansatz for LiH molecule'},
+  {name:'vqe_uccd',q:4,domain:'optimization',tags:['vqe','uccsd'],desc:'UCCD ansatz: unitary coupled cluster'},
+  {name:'ising_model_4',q:4,domain:'optimization',tags:['ising','spin'],desc:'Transverse-field Ising model evolution'},
+  {name:'heisenberg_4',q:4,domain:'optimization',tags:['heisenberg','spin'],desc:'Heisenberg spin chain XXX Trotter step'},
+  {name:'adiabatic_4',q:4,domain:'optimization',tags:['adiabatic','annealing'],desc:'Adiabatic evolution: ramp from easy to hard'},
+  {name:'grover_opt',q:4,domain:'optimization',tags:['grover','optimization'],desc:'Grover-based combinatorial optimization'},
+  {name:'trotter_h2',q:4,domain:'optimization',tags:['trotter','simulation'],desc:'Trotterised H₂ evolution: first-order decomposition'},
+  {name:'kicked_ising_4',q:4,domain:'optimization',tags:['kicked','ising'],desc:'Kicked transverse-field Ising: Floquet dynamics'},
+  {name:'rqaoa_4',q:4,domain:'optimization',tags:['rqaoa','qaoa'],desc:'Recursive QAOA: iteratively reduce problem size'},
+  // simulation (10)
+  {name:'ising_1d_4',q:4,domain:'simulation',tags:['ising','1d'],desc:'1D transverse-field Ising Trotter step'},
+  {name:'fermi_hubbard_4',q:4,domain:'simulation',tags:['fermi-hubbard'],desc:'Fermi-Hubbard model single Trotter step'},
+  {name:'molecular_h2',q:4,domain:'simulation',tags:['h2','chemistry'],desc:'H₂ molecular Hamiltonian: Jordan-Wigner mapping'},
+  {name:'xxz_chain_4',q:4,domain:'simulation',tags:['xxz','spin'],desc:'XXZ spin chain: anisotropic Heisenberg'},
+  {name:'tfim_4',q:4,domain:'simulation',tags:['tfim'],desc:'Transverse-field Ising model: quantum phase transition'},
+  {name:'bose_hubbard_4',q:4,domain:'simulation',tags:['bose-hubbard'],desc:'Bose-Hubbard model: boson hopping on 4-site lattice'},
+  {name:'vqe_beh2',q:6,domain:'simulation',tags:['beh2','chemistry'],desc:'BeH₂: 6-qubit VQE ground state'},
+  {name:'clock_sync_4',q:4,domain:'simulation',tags:['clock','sync'],desc:'Quantum clock synchronisation protocol'},
+  {name:'loschmidt_4',q:4,domain:'simulation',tags:['loschmidt','echo'],desc:'Loschmidt echo: forward + time-reversed evolution'},
+  {name:'qsim_random_4',q:4,domain:'simulation',tags:['random','benchmark'],desc:'Random circuit for hardware benchmarking'},
+  // communication (5)
+  {name:'teleport_full',q:3,domain:'communication',tags:['teleportation','qcomm'],desc:'Full teleportation with classical correction'},
+  {name:'entswap_4',q:4,domain:'communication',tags:['entanglement-swapping'],desc:'Entanglement swapping: extends entanglement range'},
+  {name:'repeater_4',q:4,domain:'communication',tags:['repeater','qnetwork'],desc:'Elementary quantum repeater'},
+  {name:'dense_code_2',q:2,domain:'communication',tags:['dense','coding'],desc:'Dense coding: 2 cbits into 1 shared qubit'},
+  {name:'qcomm_channel_3',q:3,domain:'communication',tags:['channel','qcomm'],desc:'Quantum channel simulation: amplitude-damping noise'},
+];
+
+const DOMAIN_COLORS = {
+  fundamental:'#58a6ff', algorithms:'#3fb950', arithmetic:'#d29922',
+  error_correction:'#f85149', cryptography:'#bc8cff', optimization:'#f0883e',
+  simulation:'#79c0ff', communication:'#56d364',
+};
+
+let _domain = '';
+
+function setDomain(d, btn) {
+  _domain = d;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = CIRCUITS.filter(c => {
+    if (_domain && c.domain !== _domain) return false;
+    if (q && !c.name.includes(q) && !c.desc.toLowerCase().includes(q) && !c.tags.join(' ').includes(q)) return false;
+    return true;
+  });
+  document.getElementById('count').textContent = `${filtered.length} circuit${filtered.length===1?'':'s'}`;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  filtered.forEach(c => {
+    const col = DOMAIN_COLORS[c.domain] || '#7d8590';
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.onclick = () => openModal(c);
+    div.innerHTML = `
+      <div class="card-name">${_esc(c.name)}</div>
+      <div class="card-domain" style="color:${col}">${c.domain.replace('_',' ')}</div>
+      <div class="card-desc">${_esc(c.desc)}</div>
+      <div class="card-meta">
+        <span class="qubits">${c.q}q</span>
+        ${c.tags.slice(0,3).map(t=>`<span class="tag">${_esc(t)}</span>`).join('')}
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function _esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openModal(c) {
+  document.getElementById('m-name').textContent = c.name;
+  document.getElementById('m-domain').textContent = c.domain.replace('_',' ') + ' · ' + c.q + ' qubits';
+  document.getElementById('m-desc').textContent = c.desc;
+  document.getElementById('m-qasm').textContent = buildQasm(c);
+  document.getElementById('m-cid').textContent = 'lcid:' + fakeCid(c.name);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function copyQasm() {
+  navigator.clipboard.writeText(document.getElementById('m-qasm').textContent);
+  const btn = document.querySelector('.copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}
+
+// Minimal QASM preview generator for the browser (mirrors Python library)
+function buildQasm(c) {
+  const n = c.q;
+  const lines = ['OPENQASM 2.0;', 'include "qelib1.inc";', `// ${c.desc}`, `qreg q[${n}];`, `creg c[${n}];`];
+  lines.push(...bodyFor(c.name, n));
+  for (let i = 0; i < n; i++) lines.push(`measure q[${i}] -> c[${i}];`);
+  return lines.join('\n');
+}
+
+function bodyFor(name, q) {
+  const ghz = (n) => {
+    const b = ['h q[0];'];
+    for(let i=0;i<n-1;i++) b.push(`cx q[${i}],q[${i+1}];`);
+    return b;
+  };
+  const hAll = (n) => Array.from({length:n},(_,i)=>`h q[${i}];`);
+  switch(name) {
+    case 'h_single':       return ['h q[0];'];
+    case 'cnot':           return ['h q[0];','cx q[0],q[1];'];
+    case 'toffoli':        return ['h q[0];','h q[1];','ccx q[0],q[1],q[2];'];
+    case 'swap':           return ['h q[0];','swap q[0],q[1];'];
+    case 'cswap':          return ['x q[0];','h q[1];','cswap q[0],q[1],q[2];'];
+    case 'bell_phi_plus':  return ['h q[0];','cx q[0],q[1];'];
+    case 'bell_phi_minus': return ['h q[0];','cx q[0],q[1];','z q[0];'];
+    case 'bell_psi_plus':  return ['h q[0];','cx q[0],q[1];','x q[1];'];
+    case 'bell_psi_minus': return ['h q[0];','cx q[0],q[1];','x q[1];','z q[0];'];
+    case 'ghz_3': return ghz(3);
+    case 'ghz_4': return ghz(4);
+    case 'ghz_5': return ghz(5);
+    case 'w_state_3': return ['x q[0];','h q[0];','cx q[0],q[1];','t q[0];','h q[0];','cx q[0],q[2];','h q[0];','cx q[0],q[1];','h q[0];'];
+    case 'qft_4': return ['h q[0];','cp(pi/2) q[1],q[0];','cp(pi/4) q[2],q[0];','cp(pi/8) q[3],q[0];','h q[1];','cp(pi/2) q[2],q[1];','cp(pi/4) q[3],q[1];','h q[2];','cp(pi/2) q[3],q[2];','h q[3];','swap q[0],q[3];','swap q[1],q[2];'];
+    default: {
+      const b = hAll(q);
+      for(let i=0;i<q;i++) b.push(`cx q[${i}],q[${(i+1)%q}];`);
+      return b;
+    }
+  }
+}
+
+// Deterministic fake CID for browser preview (real CID computed by Python)
+function fakeCid(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(16).padStart(8,'0') + name.length.toString(16).padStart(4,'0') + '00000000000000000000';
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+render();
+</script>
+</body>
+</html>
