@@ -50,6 +50,12 @@ def test_result_validation():
         QuantumResult(circuit_cid="lcid:x", counts={})
     with pytest.raises(ValueError):
         QuantumResult(circuit_cid="lcid:x", counts={"0": -1})
+    with pytest.raises(ValueError):
+        QuantumResult(circuit_cid="lcid:x", counts={"0": 0})
+    with pytest.raises(ValueError):
+        QuantumResult(circuit_cid="lcid:x", counts={"0": 5}, shots=-1)
+    with pytest.raises(ValueError):
+        QuantumResult(circuit_cid="lcid:x", counts={"0": 5, "1": 5}, shots=9)
 
 
 # ── BackendDescriptor ─────────────────────────────────────────────────────

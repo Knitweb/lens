@@ -49,6 +49,10 @@ class QuantumResult:
                 raise ValueError(f"invalid counts entry: {k!r} -> {v!r}")
         if not self.shots:
             self.shots = sum(self.counts.values())
+        if self.shots <= 0:
+            raise ValueError("QuantumResult requires a positive shot count")
+        if self.shots < sum(self.counts.values()):
+            raise ValueError("shots cannot be smaller than total counts")
 
     # ------------------------------------------------------------------ CID
     def _cid_payload(self) -> dict:
